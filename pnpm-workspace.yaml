@@ -3,5 +3,7 @@ packages:
   - "packages/*"
   - "tests/*"
 allowBuilds:
-  sharp: true
-  unrs-resolver: true
+  '@apollo/protobufjs': true
+  'esbuild': true
+  'sharp': true
+  'unrs-resolver': true
