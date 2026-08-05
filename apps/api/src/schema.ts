@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { prisma } from "@shiftflow/database";
 
 const createEmployeeSchema = z.object({
   name: z
@@ -40,22 +41,12 @@ export const typeDefs = `#graphql
     email: String
   }
   
-  input DeleteEmployeeInput {
-    name: String
-    email: String
-  }
-
   type Mutation {
    createEmployee(input: CreateEmployeeInput!):Employee!
    updateEmployee(id: ID!, input: UpdateEmployeeInput!):Employee!
    deleteEmployee(id: ID! ):Employee!
   }
 `;
-
-const employees = [
-  { id: "1", name: "Bob", email: "bob@email.co.uk" },
-  { id: "2", name: "Sarah", email: "sarah@email.co.uk" },
-];
 
 type EmployeeArgs = {
   id: string;
@@ -78,14 +69,18 @@ type UpdateEmployeeArgs = {
 
 export const resolvers = {
   Query: {
-    employees: () => employees,
+    employees: async () => prisma.employee.findMany(),
 
-    employee: (_parent: unknown, args: EmployeeArgs) =>
-      employees.find((employee) => employee.id === args.id),
+    employee: async (_parent: unknown, args: EmployeeArgs) =>
+      prisma.employee.findUnique({
+        where: {
+          id: args.id,
+        },
+      }),
   },
 
   Mutation: {
-    createEmployee: (_parent: unknown, args: CreateEmployeeArgs) => {
+    createEmployee: async (_parent: unknown, args: CreateEmployeeArgs) => {
       const result = createEmployeeSchema.safeParse(args.input);
 
       if (!result.success) {
@@ -94,26 +89,25 @@ export const resolvers = {
 
       const data = result.data;
 
-      const emailExists = employees.some(
-        (employee) => employee.email === data.email,
-      );
+      const existingEmployee = await prisma.employee.findUnique({
+        where: {
+          email: data.email,
+        },
+      });
 
-      if (emailExists) {
+      if (existingEmployee) {
         throw new Error("This email already exists");
       }
 
-      const newEmployee = {
-        id: String(employees.length + 1),
-        name: data.name,
-        email: data.email,
-      };
-
-      employees.push(newEmployee);
-
-      return newEmployee;
+      return prisma.employee.create({
+        data: {
+          name: data.name,
+          email: data.email,
+        },
+      });
     },
 
-    updateEmployee: (_parent: unknown, args: UpdateEmployeeArgs) => {
+    updateEmployee: async (_parent: unknown, args: UpdateEmployeeArgs) => {
       const result = updateEmployeeSchema.safeParse(args.input);
 
       if (!result.success) {
@@ -122,50 +116,55 @@ export const resolvers = {
 
       const data = result.data;
 
-      const employeeIndex = employees.findIndex(
-        (employee) => employee.id === args.id,
-      );
+      const existingEmployee = await prisma.employee.findUnique({
+        where: {
+          id: args.id,
+        },
+      });
 
-      if (employeeIndex === -1) {
+      if (!existingEmployee) {
         throw new Error("Employee not found");
       }
 
       if (data.email !== undefined) {
-        const emailExists = employees.some(
-          (employee) =>
-            employee.id !== args.id && employee.email === data.email,
-        );
+        const employeeWithEmail = await prisma.employee.findUnique({
+          where: {
+            email: data.email,
+          },
+        });
 
-        if (emailExists) {
+        if (employeeWithEmail && employeeWithEmail.id !== args.id) {
           throw new Error("This email already belongs to another employee");
         }
       }
 
-      const existingEmployee = employees[employeeIndex];
-
-      const updatedEmployee = {
-        ...existingEmployee,
-        name: data.name ?? existingEmployee.name,
-        email: data.email ?? existingEmployee.email,
-      };
-
-      employees[employeeIndex] = updatedEmployee;
-
-      return updatedEmployee;
+      return prisma.employee.update({
+        where: {
+          id: args.id,
+        },
+        data: {
+          name: data.name,
+          email: data.email,
+        },
+      });
     },
 
-    deleteEmployee: (_parent: unknown, args: EmployeeArgs) => {
-      const employeeIndex = employees.findIndex(
-        (employee) => employee.id === args.id,
-      );
+    deleteEmployee: async (_parent: unknown, args: EmployeeArgs) => {
+      const existingEmployee = await prisma.employee.findUnique({
+        where: {
+          id: args.id,
+        },
+      });
 
-      if (employeeIndex === -1) {
+      if (!existingEmployee) {
         throw new Error("Employee not found");
       }
 
-      const [deletedEmployee] = employees.splice(employeeIndex, 1);
-
-      return deletedEmployee;
+      return prisma.employee.delete({
+        where: {
+          id: args.id,
+        },
+      });
     },
   },
 };
