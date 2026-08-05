@@ -40,11 +40,6 @@ export const typeDefs = `#graphql
     email: String
   }
   
-  input DeleteEmployeeInput {
-    name: String
-    email: String
-  }
-
   type Mutation {
    createEmployee(input: CreateEmployeeInput!):Employee!
    updateEmployee(id: ID!, input: UpdateEmployeeInput!):Employee!
