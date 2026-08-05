@@ -39,10 +39,16 @@ export const typeDefs = `#graphql
     name: String
     email: String
   }
+  
+  input DeleteEmployeeInput {
+    name: String
+    email: String
+  }
 
   type Mutation {
    createEmployee(input: CreateEmployeeInput!):Employee!
    updateEmployee(id: ID!, input: UpdateEmployeeInput!):Employee!
+   deleteEmployee(id: ID! ):Employee!
   }
 `;
 
@@ -146,6 +152,20 @@ export const resolvers = {
       employees[employeeIndex] = updatedEmployee;
 
       return updatedEmployee;
+    },
+
+    deleteEmployee: (_parent: unknown, args: EmployeeArgs) => {
+      const employeeIndex = employees.findIndex(
+        (employee) => employee.id === args.id,
+      );
+
+      if (employeeIndex === -1) {
+        throw new Error("Employee not found");
+      }
+
+      const [deletedEmployee] = employees.splice(employeeIndex, 1);
+
+      return deletedEmployee;
     },
   },
 };
