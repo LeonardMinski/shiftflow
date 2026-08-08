@@ -9,4 +9,5 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/Employee.ts'
+export type * from './models/Shift.ts'
 export type * from './commonInputTypes.ts'
