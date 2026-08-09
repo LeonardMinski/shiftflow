@@ -1,0 +1,110 @@
+"use client";
+
+import type { Employee } from "@/types";
+import { Field } from "@/components/ui/Field";
+import { SectionLabel } from "@/components/ui/SectionLabel";
+import { Button } from "@/components/ui/Button";
+
+type EmployeeFormProps = {
+  name: string;
+  email: string;
+  editingEmployee: Employee | null;
+  creating: boolean;
+  updating: boolean;
+  onNameChange: (value: string) => void;
+  onEmailChange: (value: string) => void;
+  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+  onCancelEdit: () => void;
+};
+
+export function EmployeeForm({
+  name,
+  email,
+  editingEmployee,
+  creating,
+  updating,
+  onNameChange,
+  onEmailChange,
+  onSubmit,
+  onCancelEdit,
+}: EmployeeFormProps) {
+  return (
+    <aside className="lg:sticky lg:top-8 lg:self-start">
+      <div className="border border-black/10 bg-[#EAE4D9] p-6 md:p-8">
+        <SectionLabel>
+          {editingEmployee ? "Edit person" : "Add person"}
+        </SectionLabel>
+
+        <h2 className="mt-3 text-3xl font-semibold tracking-[-0.04em]">
+          {editingEmployee ? "Edit employee" : "New employee"}
+        </h2>
+
+        <p className="mt-2 max-w-sm text-sm leading-6 text-black/50">
+          {editingEmployee
+            ? "Update this employee's details."
+            : "Add a team member to the shared directory."}
+        </p>
+
+        <form onSubmit={onSubmit} className="mt-8 space-y-7">
+          <Field
+            id="name"
+            label="Name"
+            value={name}
+            placeholder="Bob Hope"
+            onChange={onNameChange}
+          />
+
+          <Field
+            id="email"
+            label="Email"
+            type="email"
+            value={email}
+            placeholder="name@company.com"
+            onChange={onEmailChange}
+          />
+
+          <Button
+            type="submit"
+            disabled={creating || updating}
+            className="
+              mt-2 flex w-full items-center justify-between
+              bg-[#171717] px-5 py-3.5
+              text-sm font-medium text-white
+              transition
+              hover:bg-[#FF5A36]
+              focus-visible:outline-none
+              focus-visible:ring-2
+              focus-visible:ring-[#FF5A36]
+              focus-visible:ring-offset-2
+              focus-visible:ring-offset-[#EAE4D9]
+              disabled:cursor-not-allowed
+              disabled:opacity-40
+            "
+          >
+            <span>
+              {creating || updating
+                ? editingEmployee
+                  ? "Updating employee…"
+                  : "Creating employee…"
+                : editingEmployee
+                  ? "Save changes"
+                  : "Add employee"}
+            </span>
+
+            <span aria-hidden="true">→</span>
+          </Button>
+
+          {editingEmployee && (
+            <Button
+              type="button"
+              onClick={onCancelEdit}
+              className="w-full text-sm text-black/45 transition hover:text-black"
+            >
+              Cancel edit
+            </Button>
+          )}
+        </form>
+      </div>
+    </aside>
+  );
+}
