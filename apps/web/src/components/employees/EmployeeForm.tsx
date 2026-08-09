@@ -50,7 +50,7 @@ export function EmployeeForm({
             id="name"
             label="Name"
             value={name}
-            placeholder="Leonard Minski"
+            placeholder="Bob Hope"
             onChange={onNameChange}
           />
 
