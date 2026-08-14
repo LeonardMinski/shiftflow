@@ -24,13 +24,10 @@ import {
 import { toDateTimeLocal } from "@/lib/date";
 import ShiftForm from "@/components/shift/shiftForm";
 import ShiftList from "@/components/shift/shiftList";
+import ShiftFilter from "@/components/shift/shiftFilter";
 
 export default function DisplayShifts() {
-  const { 
-    loading, 
-    error, 
-    data 
-  } = useQuery<GetShiftsData>(GET_SHIFTS);
+  const { loading, error, data } = useQuery<GetShiftsData>(GET_SHIFTS);
 
   const {
     data: employeesData,
@@ -44,6 +41,8 @@ export default function DisplayShifts() {
   const [employeeId, setEmployeeId] = useState("");
   const [editShift, setEditShift] = useState<Shift | null>(null);
   const [deletingShiftId, setDeletingShiftId] = useState<string | null>(null);
+  const [selectedEmployeeFilter, setSelectedEmployeeFilter] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const [createShift, { loading: creating }] = useMutation<
     CreateShiftData,
@@ -59,12 +58,12 @@ export default function DisplayShifts() {
     refetchQueries: [{ query: GET_SHIFTS }],
   });
 
-  const [deleteShift] = useMutation<
-    DeleteShiftData,
-    DeleteShiftVariables
-  >(DELETE_SHIFT, {
-    refetchQueries: [{ query: GET_SHIFTS }],
-  });
+  const [deleteShift] = useMutation<DeleteShiftData, DeleteShiftVariables>(
+    DELETE_SHIFT,
+    {
+      refetchQueries: [{ query: GET_SHIFTS }],
+    },
+  );
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -130,7 +129,6 @@ export default function DisplayShifts() {
         setEndTime("");
         setEmployeeId("");
       }
-
     } finally {
       setDeletingShiftId(null);
     }
@@ -196,30 +194,60 @@ export default function DisplayShifts() {
     return null;
   }
 
+  const filteredShifts = data.shifts.filter((shift) => {
+    const matchesEmployee =
+      selectedEmployeeFilter === "" ||
+      (selectedEmployeeFilter === "unassigned"
+        ? shift.employee === null
+        : shift.employee?.id === selectedEmployeeFilter);
+
+    const matchesTitle = shift.title
+      .toLowerCase()
+      .includes(searchTerm.trim().toLowerCase());
+
+    return matchesEmployee && matchesTitle;
+  });
+
   return (
     <>
-      <ShiftList
-        shifts={data.shifts}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        updating={updating}
-        deletingShiftId={deletingShiftId}
-      />
-      <ShiftForm
-        title={title}
-        startTime={startTime}
-        endTime={endTime}
-        employeeId={employeeId}
-        employees={employeesData.employees}
-        creating={creating}
-        updating={updating}
-        editShift={editShift}
-        onTitleChange={setTitle}
-        onStartTimeChange={setStartTime}
-        onEndTimeChange={setEndTime}
-        onEmployeeChange={setEmployeeId}
-        onSubmit={handleSubmit}
-      />
+      <main className="min-h-screen bg-[#F4F0E8] text-[#171717]">
+        <div className="mx-auto max-w-6xl px-6 py-10 md:px-10 md:py-14">
+          <div className="mb-8">
+            <ShiftFilter
+              selectedEmployeeFilter={selectedEmployeeFilter}
+              employees={employeesData.employees}
+              searchTerm={searchTerm}
+              onFilterChange={setSelectedEmployeeFilter}
+              onSearchChange={setSearchTerm}
+            />
+          </div>
+          <div className="grid gap-10 lg:grid-cols-[1.4fr_0.8fr]">
+            <ShiftList
+              shifts={filteredShifts}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              updating={updating}
+              deletingShiftId={deletingShiftId}
+            />
+  
+            <ShiftForm
+              title={title}
+              startTime={startTime}
+              endTime={endTime}
+              employeeId={employeeId}
+              employees={employeesData.employees}
+              creating={creating}
+              updating={updating}
+              editShift={editShift}
+              onTitleChange={setTitle}
+              onStartTimeChange={setStartTime}
+              onEndTimeChange={setEndTime}
+              onEmployeeChange={setEmployeeId}
+              onSubmit={handleSubmit}
+            />
+          </div>
+        </div>
+      </main>
     </>
   );
 }
