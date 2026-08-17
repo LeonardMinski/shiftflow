@@ -8,10 +8,11 @@ import {
   DeleteShiftData,
   DeleteShiftVariables,
   GetShiftsData,
+  Errors,
   Shift,
   UpdateShiftData,
   UpdateShiftVariables,
-} from "@/types/shifts";
+} from "@/types";
 import { GetEmployeesData } from "@/types/employee";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { useState } from "react";
@@ -25,6 +26,9 @@ import { toDateTimeLocal } from "@/lib/date";
 import ShiftForm from "@/components/shift/shiftForm";
 import ShiftList from "@/components/shift/shiftList";
 import ShiftFilter from "@/components/shift/shiftFilter";
+import { filterShifts } from "@/lib/shifts/filterShifts";
+
+
 
 export default function DisplayShifts() {
   const { loading, error, data } = useQuery<GetShiftsData>(GET_SHIFTS);
@@ -43,6 +47,11 @@ export default function DisplayShifts() {
   const [deletingShiftId, setDeletingShiftId] = useState<string | null>(null);
   const [selectedEmployeeFilter, setSelectedEmployeeFilter] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [errors, setErrors] = useState<Errors>({
+    title: "",
+    startTime: "",
+    endTime: "",
+  });
 
   const [createShift, { loading: creating }] = useMutation<
     CreateShiftData,
@@ -68,7 +77,36 @@ export default function DisplayShifts() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!title.trim() || !startTime || !endTime) {
+    const newErrors: Errors = {
+      title: "",
+      startTime: "",
+      endTime: "",
+    };
+
+    if (!title.trim()) {
+      newErrors.title = "Title is required.";
+    }
+
+    if (!startTime) {
+      newErrors.startTime = "Start time is required.";
+    }
+
+    if (!endTime) {
+      newErrors.endTime = "End time is required.";
+    }
+
+    if (startTime && endTime && new Date(endTime) <= new Date(startTime)) {
+      newErrors.endTime = "End time must be after start time.";
+    }
+
+    setErrors(newErrors);
+
+    const hasErrors =
+      newErrors.title !== "" ||
+      newErrors.startTime !== "" ||
+      newErrors.endTime !== "";
+
+    if (hasErrors) {
       return;
     }
 
@@ -103,6 +141,12 @@ export default function DisplayShifts() {
     setStartTime("");
     setEndTime("");
     setEmployeeId("");
+
+    setErrors({
+      title: "",
+      startTime: "",
+      endTime: "",
+    });
   };
 
   const handleEdit = (shift: Shift) => {
@@ -133,6 +177,41 @@ export default function DisplayShifts() {
       setDeletingShiftId(null);
     }
   };
+
+  const handleTitleChange = (value: string) => {
+    setTitle(value);
+
+    if (errors.title) {
+      setErrors((currentErrors) => ({
+        ...currentErrors,
+        title: "",
+      }));
+    }
+  };
+
+  const handleStartTimeChange = (value: string) => {
+    setStartTime(value);
+
+    setErrors((currentErrors) => ({
+      ...currentErrors,
+      startTime: "",
+      endTime:
+        currentErrors.endTime === "End time must be after start time."
+          ? ""
+          : currentErrors.endTime,
+    }));
+  };
+
+  const handleEndTimeChange = (value: string) => {
+      setEndTime(value);
+
+      if (errors.endTime) {
+        setErrors((currentErrors) => ({
+          ...currentErrors,
+          endTime: "",
+        }));
+      }
+    };
 
   if (loading) {
     return (
@@ -194,25 +273,18 @@ export default function DisplayShifts() {
     return null;
   }
 
-  const filteredShifts = data.shifts.filter((shift) => {
-    const matchesEmployee =
-      selectedEmployeeFilter === "" ||
-      (selectedEmployeeFilter === "unassigned"
-        ? shift.employee === null
-        : shift.employee?.id === selectedEmployeeFilter);
-
-    const matchesTitle = shift.title
-      .toLowerCase()
-      .includes(searchTerm.trim().toLowerCase());
-
-    return matchesEmployee && matchesTitle;
-  });
+  const filteredShifts = filterShifts(
+    data.shifts,
+    selectedEmployeeFilter,
+    searchTerm,
+  );
 
   return (
     <>
       <main className="min-h-screen bg-[#F4F0E8] text-[#171717]">
         <div className="mx-auto max-w-6xl px-6 py-10 md:px-10 md:py-14">
           <div className="mb-8">
+            
             <ShiftFilter
               selectedEmployeeFilter={selectedEmployeeFilter}
               employees={employeesData.employees}
@@ -229,9 +301,10 @@ export default function DisplayShifts() {
               updating={updating}
               deletingShiftId={deletingShiftId}
             />
-  
+
             <ShiftForm
               title={title}
+              errors={errors}
               startTime={startTime}
               endTime={endTime}
               employeeId={employeeId}
@@ -239,9 +312,9 @@ export default function DisplayShifts() {
               creating={creating}
               updating={updating}
               editShift={editShift}
-              onTitleChange={setTitle}
-              onStartTimeChange={setStartTime}
-              onEndTimeChange={setEndTime}
+              onTitleChange={handleTitleChange}
+              onStartTimeChange={handleStartTimeChange}
+              onEndTimeChange={handleEndTimeChange}
               onEmployeeChange={setEmployeeId}
               onSubmit={handleSubmit}
             />

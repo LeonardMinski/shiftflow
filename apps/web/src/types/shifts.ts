@@ -1,7 +1,7 @@
 import { Employee } from "@/types/employee";
 
 export type Shift = {
-  employeeId: any;
+  employeeId: string;
   id: string;
   title: string;
   startTime: string;

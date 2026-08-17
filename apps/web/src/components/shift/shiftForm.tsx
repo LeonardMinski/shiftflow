@@ -5,6 +5,11 @@ import { Button } from "@/components/ui/Button";
 
 type ShiftFormProps = {
   title: string;
+  errors: { 
+    title: string,
+    endTime: string,
+    startTime: string
+  };
   startTime: string;
   endTime: string;
   employeeId: string;
@@ -23,6 +28,7 @@ type ShiftFormProps = {
 export default function ShiftForm({
   title,
   startTime,
+  errors,
   endTime,
   employeeId,
   employees,
@@ -78,6 +84,10 @@ export default function ShiftForm({
               onChange={(e) => onTitleChange(e.target.value)}
               className={inputClassName}
             />
+
+            {errors.title && (
+              <p className="text-sm text-red-700">{errors.title}</p>
+            )}
           </div>
 
           <div>
@@ -119,6 +129,10 @@ export default function ShiftForm({
               onChange={(e) => onStartTimeChange(e.target.value)}
               className={inputClassName}
             />
+
+            {errors.startTime && (
+              <p className="text-sm text-red-700">{errors.startTime}</p>
+            )}
           </div>
 
           <div>
@@ -136,6 +150,10 @@ export default function ShiftForm({
               onChange={(e) => onEndTimeChange(e.target.value)}
               className={inputClassName}
             />
+
+            {errors.endTime && (
+              <p className="text-sm text-red-700">{errors.endTime}</p>
+            )}
           </div>
 
           <Button
