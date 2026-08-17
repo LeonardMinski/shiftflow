@@ -27,8 +27,7 @@ import ShiftForm from "@/components/shift/shiftForm";
 import ShiftList from "@/components/shift/shiftList";
 import ShiftFilter from "@/components/shift/shiftFilter";
 import { filterShifts } from "@/lib/shifts/filterShifts";
-
-
+import { validateShift } from "@/lib/shifts/validateShift";
 
 export default function DisplayShifts() {
   const { loading, error, data } = useQuery<GetShiftsData>(GET_SHIFTS);
@@ -74,37 +73,52 @@ export default function DisplayShifts() {
     },
   );
 
+  const handleEdit = (shift: Shift) => {
+    setEditShift(shift);
+    setTitle(shift.title);
+    setStartTime(toDateTimeLocal(shift.startTime));
+    setEndTime(toDateTimeLocal(shift.endTime));
+    setEmployeeId(shift.employee?.id ?? "");
+  };
+
+  const handleDelete = async (id: string) => {
+    setDeletingShiftId(id);
+    try {
+      await deleteShift({
+        variables: {
+          id,
+        },
+      });
+
+      if (editShift?.id === id) {
+        setEditShift(null);
+        setTitle("");
+        setStartTime("");
+        setEndTime("");
+        setEmployeeId("");
+      }
+    } finally {
+      setDeletingShiftId(null);
+    }
+  };
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const newErrors: Errors = {
-      title: "",
-      startTime: "",
-      endTime: "",
-    };
-
-    if (!title.trim()) {
-      newErrors.title = "Title is required.";
-    }
-
-    if (!startTime) {
-      newErrors.startTime = "Start time is required.";
-    }
-
-    if (!endTime) {
-      newErrors.endTime = "End time is required.";
-    }
-
-    if (startTime && endTime && new Date(endTime) <= new Date(startTime)) {
-      newErrors.endTime = "End time must be after start time.";
-    }
+    const newErrors = validateShift(
+      data?.shifts ?? [],
+      title,
+      startTime,
+      endTime,
+      employeeId,
+      editShift?.id,
+    );
 
     setErrors(newErrors);
 
-    const hasErrors =
-      newErrors.title !== "" ||
-      newErrors.startTime !== "" ||
-      newErrors.endTime !== "";
+    const hasErrors = Object.values(newErrors).some(
+      (message) => message !== "",
+    );
 
     if (hasErrors) {
       return;
@@ -149,35 +163,6 @@ export default function DisplayShifts() {
     });
   };
 
-  const handleEdit = (shift: Shift) => {
-    setEditShift(shift);
-    setTitle(shift.title);
-    setStartTime(toDateTimeLocal(shift.startTime));
-    setEndTime(toDateTimeLocal(shift.endTime));
-    setEmployeeId(shift.employee?.id ?? "");
-  };
-
-  const handleDelete = async (id: string) => {
-    setDeletingShiftId(id);
-    try {
-      await deleteShift({
-        variables: {
-          id,
-        },
-      });
-
-      if (editShift?.id === id) {
-        setEditShift(null);
-        setTitle("");
-        setStartTime("");
-        setEndTime("");
-        setEmployeeId("");
-      }
-    } finally {
-      setDeletingShiftId(null);
-    }
-  };
-
   const handleTitleChange = (value: string) => {
     setTitle(value);
 
@@ -196,22 +181,37 @@ export default function DisplayShifts() {
       ...currentErrors,
       startTime: "",
       endTime:
-        currentErrors.endTime === "End time must be after start time."
+        currentErrors.endTime === "End time must be after start time." ||
+        currentErrors.endTime ===
+          "This employee already has an overlapping shift."
           ? ""
           : currentErrors.endTime,
     }));
   };
 
   const handleEndTimeChange = (value: string) => {
-      setEndTime(value);
+    setEndTime(value);
 
-      if (errors.endTime) {
-        setErrors((currentErrors) => ({
-          ...currentErrors,
-          endTime: "",
-        }));
-      }
-    };
+    if (errors.endTime) {
+      setErrors((currentErrors) => ({
+        ...currentErrors,
+        endTime: "",
+      }));
+    }
+  };
+
+  const handleEmployeeChange = (value: string) => {
+    setEmployeeId(value);
+
+    setErrors((currentErrors) => ({
+      ...currentErrors,
+      endTime:
+        currentErrors.endTime ===
+        "This employee already has an overlapping shift."
+          ? ""
+          : currentErrors.endTime,
+    }));
+  };
 
   if (loading) {
     return (
@@ -284,7 +284,6 @@ export default function DisplayShifts() {
       <main className="min-h-screen bg-[#F4F0E8] text-[#171717]">
         <div className="mx-auto max-w-6xl px-6 py-10 md:px-10 md:py-14">
           <div className="mb-8">
-            
             <ShiftFilter
               selectedEmployeeFilter={selectedEmployeeFilter}
               employees={employeesData.employees}
@@ -315,7 +314,7 @@ export default function DisplayShifts() {
               onTitleChange={handleTitleChange}
               onStartTimeChange={handleStartTimeChange}
               onEndTimeChange={handleEndTimeChange}
-              onEmployeeChange={setEmployeeId}
+              onEmployeeChange={handleEmployeeChange}
               onSubmit={handleSubmit}
             />
           </div>
