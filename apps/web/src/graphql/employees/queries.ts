@@ -6,6 +6,14 @@ export const GET_EMPLOYEES = gql`
       id
       name
       email
+      availability {
+        id
+        startTime
+        endTime
+        available
+        employeeId
+        dayOfWeek
+      }
     }
   }
 `;

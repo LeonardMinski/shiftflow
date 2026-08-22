@@ -23,6 +23,11 @@ export * from './enums.ts';
  */
 export type Employee = Prisma.EmployeeModel
 /**
+ * Model EmployeeAvailability
+ * 
+ */
+export type EmployeeAvailability = Prisma.EmployeeAvailabilityModel
+/**
  * Model Shift
  * 
  */

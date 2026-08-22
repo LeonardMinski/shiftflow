@@ -1,7 +1,9 @@
-import type { Errors, Shift } from "@/types";
+import type { Employee, Errors, Shift } from "@/types";
 import { hasShiftConflict } from "./hasShiftConflict";
+import { isShiftWithinAvailability } from "@/lib/availability/isShiftWithAvailability";
 
 export function validateShift(
+  employees: Employee[],
   shifts: Shift[],
   title: string,
   startTime: string,
@@ -29,6 +31,20 @@ export function validateShift(
 
   if (startTime && endTime && new Date(endTime) <= new Date(startTime)) {
     errors.endTime = "End time must be after start time.";
+  }
+
+  const selectedEmployee = employees.find(
+    (employee) => employee.id === employeeId,
+  );
+
+  if (
+    selectedEmployee &&
+    startTime &&
+    endTime &&
+    new Date(endTime) > new Date(startTime) &&
+    !isShiftWithinAvailability(selectedEmployee, startTime, endTime)
+  ) {
+    errors.endTime = "Shift is outside this employee's availability";
   }
 
   if (

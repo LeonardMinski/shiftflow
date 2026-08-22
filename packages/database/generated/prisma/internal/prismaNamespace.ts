@@ -398,6 +398,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   Employee: 'Employee',
+  EmployeeAvailability: 'EmployeeAvailability',
   Shift: 'Shift'
 } as const
 
@@ -414,7 +415,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "employee" | "shift"
+    modelProps: "employee" | "employeeAvailability" | "shift"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -489,6 +490,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.EmployeeCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.EmployeeCountAggregateOutputType> | number
+        }
+      }
+    }
+    EmployeeAvailability: {
+      payload: Prisma.$EmployeeAvailabilityPayload<ExtArgs>
+      fields: Prisma.EmployeeAvailabilityFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EmployeeAvailabilityFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeAvailabilityPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EmployeeAvailabilityFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeAvailabilityPayload>
+        }
+        findFirst: {
+          args: Prisma.EmployeeAvailabilityFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeAvailabilityPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EmployeeAvailabilityFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeAvailabilityPayload>
+        }
+        findMany: {
+          args: Prisma.EmployeeAvailabilityFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeAvailabilityPayload>[]
+        }
+        create: {
+          args: Prisma.EmployeeAvailabilityCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeAvailabilityPayload>
+        }
+        createMany: {
+          args: Prisma.EmployeeAvailabilityCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EmployeeAvailabilityCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeAvailabilityPayload>[]
+        }
+        delete: {
+          args: Prisma.EmployeeAvailabilityDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeAvailabilityPayload>
+        }
+        update: {
+          args: Prisma.EmployeeAvailabilityUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeAvailabilityPayload>
+        }
+        deleteMany: {
+          args: Prisma.EmployeeAvailabilityDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EmployeeAvailabilityUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EmployeeAvailabilityUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeAvailabilityPayload>[]
+        }
+        upsert: {
+          args: Prisma.EmployeeAvailabilityUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeAvailabilityPayload>
+        }
+        aggregate: {
+          args: Prisma.EmployeeAvailabilityAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEmployeeAvailability>
+        }
+        groupBy: {
+          args: Prisma.EmployeeAvailabilityGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EmployeeAvailabilityGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EmployeeAvailabilityCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EmployeeAvailabilityCountAggregateOutputType> | number
         }
       }
     }
@@ -616,6 +691,20 @@ export const EmployeeScalarFieldEnum = {
 export type EmployeeScalarFieldEnum = (typeof EmployeeScalarFieldEnum)[keyof typeof EmployeeScalarFieldEnum]
 
 
+export const EmployeeAvailabilityScalarFieldEnum = {
+  id: 'id',
+  employeeId: 'employeeId',
+  dayOfWeek: 'dayOfWeek',
+  available: 'available',
+  startTime: 'startTime',
+  endTime: 'endTime',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EmployeeAvailabilityScalarFieldEnum = (typeof EmployeeAvailabilityScalarFieldEnum)[keyof typeof EmployeeAvailabilityScalarFieldEnum]
+
+
 export const ShiftScalarFieldEnum = {
   id: 'id',
   title: 'title',
@@ -684,6 +773,13 @@ export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
  * Reference to a field of type 'DateTime[]'
  */
 export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -852,6 +948,7 @@ export interface PrismaClientOptionsWithAdapter extends PrismaClientBaseOptions 
 export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaClientOptionsWithAdapter
 export type GlobalOmitConfig = {
   employee?: Prisma.EmployeeOmit
+  employeeAvailability?: Prisma.EmployeeAvailabilityOmit
   shift?: Prisma.ShiftOmit
 }
 

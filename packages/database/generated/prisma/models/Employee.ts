@@ -183,6 +183,7 @@ export type EmployeeWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Employee"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Employee"> | Date | string
   shifts?: Prisma.ShiftListRelationFilter
+  availability?: Prisma.EmployeeAvailabilityListRelationFilter
 }
 
 export type EmployeeOrderByWithRelationInput = {
@@ -192,6 +193,7 @@ export type EmployeeOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   shifts?: Prisma.ShiftOrderByRelationAggregateInput
+  availability?: Prisma.EmployeeAvailabilityOrderByRelationAggregateInput
 }
 
 export type EmployeeWhereUniqueInput = Prisma.AtLeast<{
@@ -204,6 +206,7 @@ export type EmployeeWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Employee"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Employee"> | Date | string
   shifts?: Prisma.ShiftListRelationFilter
+  availability?: Prisma.EmployeeAvailabilityListRelationFilter
 }, "id" | "email">
 
 export type EmployeeOrderByWithAggregationInput = {
@@ -235,6 +238,7 @@ export type EmployeeCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   shifts?: Prisma.ShiftCreateNestedManyWithoutEmployeeInput
+  availability?: Prisma.EmployeeAvailabilityCreateNestedManyWithoutEmployeeInput
 }
 
 export type EmployeeUncheckedCreateInput = {
@@ -244,6 +248,7 @@ export type EmployeeUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutEmployeeInput
+  availability?: Prisma.EmployeeAvailabilityUncheckedCreateNestedManyWithoutEmployeeInput
 }
 
 export type EmployeeUpdateInput = {
@@ -253,6 +258,7 @@ export type EmployeeUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shifts?: Prisma.ShiftUpdateManyWithoutEmployeeNestedInput
+  availability?: Prisma.EmployeeAvailabilityUpdateManyWithoutEmployeeNestedInput
 }
 
 export type EmployeeUncheckedUpdateInput = {
@@ -262,6 +268,7 @@ export type EmployeeUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shifts?: Prisma.ShiftUncheckedUpdateManyWithoutEmployeeNestedInput
+  availability?: Prisma.EmployeeAvailabilityUncheckedUpdateManyWithoutEmployeeNestedInput
 }
 
 export type EmployeeCreateManyInput = {
@@ -312,6 +319,11 @@ export type EmployeeMinOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
 }
 
+export type EmployeeScalarRelationFilter = {
+  is?: Prisma.EmployeeWhereInput
+  isNot?: Prisma.EmployeeWhereInput
+}
+
 export type EmployeeNullableScalarRelationFilter = {
   is?: Prisma.EmployeeWhereInput | null
   isNot?: Prisma.EmployeeWhereInput | null
@@ -323,6 +335,20 @@ export type StringFieldUpdateOperationsInput = {
 
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
+}
+
+export type EmployeeCreateNestedOneWithoutAvailabilityInput = {
+  create?: Prisma.XOR<Prisma.EmployeeCreateWithoutAvailabilityInput, Prisma.EmployeeUncheckedCreateWithoutAvailabilityInput>
+  connectOrCreate?: Prisma.EmployeeCreateOrConnectWithoutAvailabilityInput
+  connect?: Prisma.EmployeeWhereUniqueInput
+}
+
+export type EmployeeUpdateOneRequiredWithoutAvailabilityNestedInput = {
+  create?: Prisma.XOR<Prisma.EmployeeCreateWithoutAvailabilityInput, Prisma.EmployeeUncheckedCreateWithoutAvailabilityInput>
+  connectOrCreate?: Prisma.EmployeeCreateOrConnectWithoutAvailabilityInput
+  upsert?: Prisma.EmployeeUpsertWithoutAvailabilityInput
+  connect?: Prisma.EmployeeWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EmployeeUpdateToOneWithWhereWithoutAvailabilityInput, Prisma.EmployeeUpdateWithoutAvailabilityInput>, Prisma.EmployeeUncheckedUpdateWithoutAvailabilityInput>
 }
 
 export type EmployeeCreateNestedOneWithoutShiftsInput = {
@@ -341,12 +367,65 @@ export type EmployeeUpdateOneWithoutShiftsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.EmployeeUpdateToOneWithWhereWithoutShiftsInput, Prisma.EmployeeUpdateWithoutShiftsInput>, Prisma.EmployeeUncheckedUpdateWithoutShiftsInput>
 }
 
+export type EmployeeCreateWithoutAvailabilityInput = {
+  id?: string
+  name: string
+  email: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  shifts?: Prisma.ShiftCreateNestedManyWithoutEmployeeInput
+}
+
+export type EmployeeUncheckedCreateWithoutAvailabilityInput = {
+  id?: string
+  name: string
+  email: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  shifts?: Prisma.ShiftUncheckedCreateNestedManyWithoutEmployeeInput
+}
+
+export type EmployeeCreateOrConnectWithoutAvailabilityInput = {
+  where: Prisma.EmployeeWhereUniqueInput
+  create: Prisma.XOR<Prisma.EmployeeCreateWithoutAvailabilityInput, Prisma.EmployeeUncheckedCreateWithoutAvailabilityInput>
+}
+
+export type EmployeeUpsertWithoutAvailabilityInput = {
+  update: Prisma.XOR<Prisma.EmployeeUpdateWithoutAvailabilityInput, Prisma.EmployeeUncheckedUpdateWithoutAvailabilityInput>
+  create: Prisma.XOR<Prisma.EmployeeCreateWithoutAvailabilityInput, Prisma.EmployeeUncheckedCreateWithoutAvailabilityInput>
+  where?: Prisma.EmployeeWhereInput
+}
+
+export type EmployeeUpdateToOneWithWhereWithoutAvailabilityInput = {
+  where?: Prisma.EmployeeWhereInput
+  data: Prisma.XOR<Prisma.EmployeeUpdateWithoutAvailabilityInput, Prisma.EmployeeUncheckedUpdateWithoutAvailabilityInput>
+}
+
+export type EmployeeUpdateWithoutAvailabilityInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  shifts?: Prisma.ShiftUpdateManyWithoutEmployeeNestedInput
+}
+
+export type EmployeeUncheckedUpdateWithoutAvailabilityInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  shifts?: Prisma.ShiftUncheckedUpdateManyWithoutEmployeeNestedInput
+}
+
 export type EmployeeCreateWithoutShiftsInput = {
   id?: string
   name: string
   email: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  availability?: Prisma.EmployeeAvailabilityCreateNestedManyWithoutEmployeeInput
 }
 
 export type EmployeeUncheckedCreateWithoutShiftsInput = {
@@ -355,6 +434,7 @@ export type EmployeeUncheckedCreateWithoutShiftsInput = {
   email: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  availability?: Prisma.EmployeeAvailabilityUncheckedCreateNestedManyWithoutEmployeeInput
 }
 
 export type EmployeeCreateOrConnectWithoutShiftsInput = {
@@ -379,6 +459,7 @@ export type EmployeeUpdateWithoutShiftsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  availability?: Prisma.EmployeeAvailabilityUpdateManyWithoutEmployeeNestedInput
 }
 
 export type EmployeeUncheckedUpdateWithoutShiftsInput = {
@@ -387,6 +468,7 @@ export type EmployeeUncheckedUpdateWithoutShiftsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  availability?: Prisma.EmployeeAvailabilityUncheckedUpdateManyWithoutEmployeeNestedInput
 }
 
 
@@ -396,10 +478,12 @@ export type EmployeeUncheckedUpdateWithoutShiftsInput = {
 
 export type EmployeeCountOutputType = {
   shifts: number
+  availability: number
 }
 
 export type EmployeeCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   shifts?: boolean | EmployeeCountOutputTypeCountShiftsArgs
+  availability?: boolean | EmployeeCountOutputTypeCountAvailabilityArgs
 }
 
 /**
@@ -419,6 +503,13 @@ export type EmployeeCountOutputTypeCountShiftsArgs<ExtArgs extends runtime.Types
   where?: Prisma.ShiftWhereInput
 }
 
+/**
+ * EmployeeCountOutputType without action
+ */
+export type EmployeeCountOutputTypeCountAvailabilityArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.EmployeeAvailabilityWhereInput
+}
+
 
 export type EmployeeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -427,6 +518,7 @@ export type EmployeeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   createdAt?: boolean
   updatedAt?: boolean
   shifts?: boolean | Prisma.Employee$shiftsArgs<ExtArgs>
+  availability?: boolean | Prisma.Employee$availabilityArgs<ExtArgs>
   _count?: boolean | Prisma.EmployeeCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["employee"]>
 
@@ -457,6 +549,7 @@ export type EmployeeSelectScalar = {
 export type EmployeeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "createdAt" | "updatedAt", ExtArgs["result"]["employee"]>
 export type EmployeeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   shifts?: boolean | Prisma.Employee$shiftsArgs<ExtArgs>
+  availability?: boolean | Prisma.Employee$availabilityArgs<ExtArgs>
   _count?: boolean | Prisma.EmployeeCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type EmployeeIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -466,6 +559,7 @@ export type $EmployeePayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   name: "Employee"
   objects: {
     shifts: Prisma.$ShiftPayload<ExtArgs>[]
+    availability: Prisma.$EmployeeAvailabilityPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -868,6 +962,7 @@ readonly fields: EmployeeFieldRefs;
 export interface Prisma__EmployeeClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   shifts<T extends Prisma.Employee$shiftsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Employee$shiftsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ShiftPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  availability<T extends Prisma.Employee$availabilityArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Employee$availabilityArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EmployeeAvailabilityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1316,6 +1411,30 @@ export type Employee$shiftsArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.ShiftScalarFieldEnum | Prisma.ShiftScalarFieldEnum[]
+}
+
+/**
+ * Employee.availability
+ */
+export type Employee$availabilityArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EmployeeAvailability
+   */
+  select?: Prisma.EmployeeAvailabilitySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the EmployeeAvailability
+   */
+  omit?: Prisma.EmployeeAvailabilityOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EmployeeAvailabilityInclude<ExtArgs> | null
+  where?: Prisma.EmployeeAvailabilityWhereInput
+  orderBy?: Prisma.EmployeeAvailabilityOrderByWithRelationInput | Prisma.EmployeeAvailabilityOrderByWithRelationInput[]
+  cursor?: Prisma.EmployeeAvailabilityWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.EmployeeAvailabilityScalarFieldEnum | Prisma.EmployeeAvailabilityScalarFieldEnum[]
 }
 
 /**

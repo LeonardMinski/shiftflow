@@ -28,6 +28,8 @@ import ShiftList from "@/components/shift/shiftList";
 import ShiftFilter from "@/components/shift/shiftFilter";
 import { filterShifts } from "@/lib/shifts/filterShifts";
 import { validateShift } from "@/lib/shifts/validateShift";
+import AvailabilityForm from "@/components/availability/availabilityForm";
+import AvailabilityList from "@/components/availability/availabilityList";
 
 export default function DisplayShifts() {
   const { loading, error, data } = useQuery<GetShiftsData>(GET_SHIFTS);
@@ -106,6 +108,7 @@ export default function DisplayShifts() {
     event.preventDefault();
 
     const newErrors = validateShift(
+      employeesData?.employees ?? [],
       data?.shifts ?? [],
       title,
       startTime,
@@ -183,7 +186,7 @@ export default function DisplayShifts() {
       endTime:
         currentErrors.endTime === "End time must be after start time." ||
         currentErrors.endTime ===
-          "This employee already has an overlapping shift."
+          "Shift is outside this employee's availability"
           ? ""
           : currentErrors.endTime,
     }));
@@ -292,6 +295,7 @@ export default function DisplayShifts() {
               onSearchChange={setSearchTerm}
             />
           </div>
+
           <div className="grid gap-10 lg:grid-cols-[1.4fr_0.8fr]">
             <ShiftList
               shifts={filteredShifts}
@@ -300,7 +304,6 @@ export default function DisplayShifts() {
               updating={updating}
               deletingShiftId={deletingShiftId}
             />
-
             <ShiftForm
               title={title}
               errors={errors}
@@ -317,6 +320,13 @@ export default function DisplayShifts() {
               onEmployeeChange={handleEmployeeChange}
               onSubmit={handleSubmit}
             />
+          </div>
+          <div className="mx-auto max-w-6xl px-6 py-10 md:px-10 md:py-14">
+            <AvailabilityList employees={employeesData.employees} />
+          </div>
+
+          <div className="mx-auto max-w-6xl px-6 py-10 md:px-10 md:py-14">
+            <AvailabilityForm employees={employeesData.employees} />
           </div>
         </div>
       </main>

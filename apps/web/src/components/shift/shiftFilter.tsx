@@ -8,8 +8,6 @@ type ShiftFilterProps = {
   onSearchChange: (value: string) => void;
 };
 
-
-
 export default function ShiftFilter({
   selectedEmployeeFilter,
   employees,

@@ -52,6 +52,7 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   Employee: 'Employee',
+  EmployeeAvailability: 'EmployeeAvailability',
   Shift: 'Shift'
 } as const
 
@@ -80,6 +81,20 @@ export const EmployeeScalarFieldEnum = {
 } as const
 
 export type EmployeeScalarFieldEnum = (typeof EmployeeScalarFieldEnum)[keyof typeof EmployeeScalarFieldEnum]
+
+
+export const EmployeeAvailabilityScalarFieldEnum = {
+  id: 'id',
+  employeeId: 'employeeId',
+  dayOfWeek: 'dayOfWeek',
+  available: 'available',
+  startTime: 'startTime',
+  endTime: 'endTime',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EmployeeAvailabilityScalarFieldEnum = (typeof EmployeeAvailabilityScalarFieldEnum)[keyof typeof EmployeeAvailabilityScalarFieldEnum]
 
 
 export const ShiftScalarFieldEnum = {
