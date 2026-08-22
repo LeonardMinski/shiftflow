@@ -15,6 +15,8 @@ export default function ShiftFilter({
   onFilterChange,
   onSearchChange,
 }: ShiftFilterProps) {
+
+  
   return (
     <>
       <label htmlFor="shift-search">Search shifts</label>

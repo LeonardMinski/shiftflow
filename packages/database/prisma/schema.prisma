@@ -8,12 +8,30 @@ datasource db {
 }
 
 model Employee {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  shifts    Shift[]
+  id           String                 @id @default(cuid())
+  name         String
+  email        String                 @unique
+  shifts       Shift[]
+  availability EmployeeAvailability[]
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+}
+
+model EmployeeAvailability {
+  id         String   @id @default(cuid())
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  dayOfWeek String
+  available Boolean
+  startTime String?
+  endTime   String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([employeeId, dayOfWeek])
+  @@index([employeeId])
 }
 
 model Shift {
@@ -22,7 +40,7 @@ model Shift {
   startTime  DateTime
   endTime    DateTime
   employeeId String?
-  employee   Employee? @relation(fields: [employeeId], references: [id], onDelete: SetNull )
+  employee   Employee? @relation(fields: [employeeId], references: [id], onDelete: SetNull)
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 

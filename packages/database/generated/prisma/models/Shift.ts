@@ -403,10 +403,6 @@ export type ShiftUncheckedUpdateManyWithoutEmployeeNestedInput = {
   deleteMany?: Prisma.ShiftScalarWhereInput | Prisma.ShiftScalarWhereInput[]
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
 export type ShiftCreateWithoutEmployeeInput = {
   id?: string
   title: string

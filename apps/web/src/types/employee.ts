@@ -1,14 +1,24 @@
 export type Employee = {
   id: string;
   name: string;
-  email: string;
+  email: string ;
+  availability: EmployeeAvailability[]
+};
+
+export type EmployeeAvailability = {
+  id: string;
+  employeeId: string;
+  dayOfWeek: string;
+  available: boolean;
+  startTime: string | null;
+  endTime: string | null;
 };
 
 export type GetEmployeesData = {
   employees: Employee[];
 };
 
- export type CreateEmployeeData = {
+export type CreateEmployeeData = {
   createEmployee: Employee;
 };
 

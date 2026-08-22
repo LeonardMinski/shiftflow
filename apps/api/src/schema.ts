@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { prisma } from "@shiftflow/database";
-import { ShiftDeleteArgs } from "../../../packages/database/generated/prisma/models.js";
 
 const createEmployeeSchema = z.object({
   name: z
@@ -32,29 +31,55 @@ const createShiftSchema = z
     path: ["endTime"],
   });
 
-  const updateShiftSchema = z
+const updateShiftSchema = z
   .object({
     title: z.string().trim().min(1).max(100).optional(),
     startTime: z.string().datetime().optional(),
     endTime: z.string().datetime().optional(),
     employeeId: z.string().trim().optional(),
   })
-  .refine((input) => 
-    input.title !== undefined || 
-    input.endTime !== undefined || 
-    input.startTime !== undefined ||
-    input.employeeId !== undefined, 
+  .refine(
+    (input) =>
+      input.title !== undefined ||
+      input.endTime !== undefined ||
+      input.startTime !== undefined ||
+      input.employeeId !== undefined,
     {
-    message: "Provide at least one field to update",
+      message: "Provide at least one field to update",
     },
   );
-  
+
+const inputEmployeeAvailabilitySchema = z
+  .object({
+    employeeId: z.string().trim().min(1),
+    dayOfWeek: z.string().trim().min(1).max(9),
+    available: z.boolean(),
+    startTime: z.string().optional(),
+    endTime: z.string().optional(),
+  })
+  .refine(
+    (input) => {
+      if (input.available === false) {
+        return input.startTime === undefined && input.endTime === undefined;
+      } else {
+        return (
+          Boolean(input.endTime && input.startTime) &&
+          input.startTime! < input.endTime!
+        );
+      }
+    },
+    {
+      message: "Invalid availability times",
+      path: ["endTime"],
+    },
+  );
 
 export const typeDefs = `#graphql
   type Employee {
     id: ID!
     name: String!
     email: String!
+    availability: [EmployeeAvailability!]!
   }
 
   type Shift {
@@ -63,6 +88,15 @@ export const typeDefs = `#graphql
   startTime: String!
   endTime: String!
   employee: Employee
+}
+
+type EmployeeAvailability {
+  id: ID!
+  employeeId: ID!
+  dayOfWeek: String!
+  available:  Boolean!
+  startTime: String
+  endTime: String
 }
 
 type Query {
@@ -95,6 +129,14 @@ type Query {
     endTime: String
     employeeId: ID
   }
+
+  input EmployeeAvailabilityInput {
+    employeeId: ID!
+    available: Boolean!
+    dayOfWeek: String!
+    startTime: String
+    endTime: String
+  }
   
   type Mutation {
    createEmployee(input: CreateEmployeeInput!):Employee!
@@ -104,6 +146,9 @@ type Query {
    createShift(input: CreateShiftInput!): Shift!
    updateShift(id: ID!, input: UpdateShiftInput!): Shift!
    deleteShift(id: ID!): Shift!
+
+   setEmployeeAvailability(input: EmployeeAvailabilityInput!): EmployeeAvailability!
+   deleteEmployeeAvailability(id: ID!): EmployeeAvailability!
   }
 `;
 
@@ -149,14 +194,37 @@ type UpdateShiftArgs = {
   };
 };
 
+type EmployeeAvailabilityArgs = {
+  input: {
+    employeeId: string;
+    dayOfWeek: string;
+    available: boolean;
+    startTime?: string;
+    endTime?: string;
+  };
+};
+
+type DeleteEmployeeAvailabilityArgs = {
+  id: string
+}
+
 export const resolvers = {
   Query: {
-    employees: async () => prisma.employee.findMany(),
+    employees: async () =>
+      prisma.employee.findMany({
+        include: {
+          availability: true,
+        },
+      }),
 
     employee: async (_parent: unknown, args: EmployeeArgs) =>
       prisma.employee.findUnique({
         where: {
           id: args.id,
+        },
+
+        include: {
+          availability: true,
         },
       }),
 
@@ -377,5 +445,68 @@ export const resolvers = {
         },
       });
     },
+
+    setEmployeeAvailability: async (
+      _parent: unknown,
+      args: EmployeeAvailabilityArgs,
+    ) => {
+      const result = inputEmployeeAvailabilitySchema.safeParse(args.input);
+
+      if (!result.success) {
+        throw new Error("Invalid availability data");
+      }
+
+      const data = result.data;
+
+      const existingEmployee = await prisma.employee.findUnique({
+        where: {
+          id: data.employeeId,
+        },
+      });
+      if (!existingEmployee) {
+        throw new Error("Employee not found");
+      }
+
+      const availability = await prisma.employeeAvailability.upsert({
+        where: {
+          employeeId_dayOfWeek: {
+            dayOfWeek: data.dayOfWeek,
+            employeeId: data.employeeId,
+          },
+        },
+        update: {
+          available: data.available,
+          startTime: data.startTime,
+          endTime: data.endTime,
+        },
+        create: {
+          employeeId: data.employeeId,
+          startTime: data.startTime,
+          endTime: data.endTime,
+          dayOfWeek: data.dayOfWeek,
+          available: data.available,
+        },
+      });
+
+      return availability;
+    },
+
+    deleteEmployeeAvailability: async (_parent: unknown, args: DeleteEmployeeAvailabilityArgs ) => {
+       const existingEmployeeAvailability = await prisma.employeeAvailability.findUnique({
+         where: {
+           id: args.id,
+         },
+       });
+
+       if (!existingEmployeeAvailability) {
+         throw new Error("Employee availability not found");
+       }
+
+       return prisma.employeeAvailability.delete({
+         where: {
+           id: args.id,
+         },
+       });
+    }
   },
 };
