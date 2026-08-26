@@ -7,11 +7,29 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Role {
+  MANAGER
+  EMPLOYEE
+}
+
+model User {
+  id             String    @id @default(cuid())
+  authProviderId String    @unique
+  email          String    @unique
+  role           Role
+  employeeId     String?   @unique
+  employee       Employee? @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Employee {
   id           String                 @id @default(cuid())
   name         String
   email        String                 @unique
   shifts       Shift[]
+  user         User?
   availability EmployeeAvailability[]
   createdAt    DateTime               @default(now())
   updatedAt    DateTime               @updatedAt
