@@ -28,8 +28,6 @@ import ShiftList from "@/components/shift/shiftList";
 import ShiftFilter from "@/components/shift/shiftFilter";
 import { filterShifts } from "@/lib/shifts/filterShifts";
 import { validateShift } from "@/lib/shifts/validateShift";
-import AvailabilityForm from "@/components/availability/availabilityForm";
-import AvailabilityList from "@/components/availability/availabilityList";
 
 export default function DisplayShifts() {
   const { loading, error, data } = useQuery<GetShiftsData>(GET_SHIFTS);
@@ -321,13 +319,7 @@ export default function DisplayShifts() {
               onSubmit={handleSubmit}
             />
           </div>
-          <div className="mx-auto max-w-6xl px-6 py-10 md:px-10 md:py-14">
-            <AvailabilityList employees={employeesData.employees} />
-          </div>
-
-          <div className="mx-auto max-w-6xl px-6 py-10 md:px-10 md:py-14">
-            <AvailabilityForm employees={employeesData.employees} />
-          </div>
+         
         </div>
       </main>
     </>
