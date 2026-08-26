@@ -1,6 +1,10 @@
-import { gql } from "@apollo/client";
+import { gql, TypedDocumentNode } from "@apollo/client";
+import { GetEmployeesData } from "@/types/employee";
 
-export const GET_EMPLOYEES = gql`
+export const GET_EMPLOYEES: TypedDocumentNode<
+  GetEmployeesData,
+  Record<string, never>
+> = gql`
   query GetEmployees {
     employees {
       id
@@ -8,11 +12,11 @@ export const GET_EMPLOYEES = gql`
       email
       availability {
         id
-        startTime
-        endTime
-        available
         employeeId
         dayOfWeek
+        available
+        startTime
+        endTime
       }
     }
   }

@@ -4,5 +4,14 @@
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.18.0",
-  "scripts": {}
+  "scripts": {
+    "dev": "pnpm -r --parallel --filter './apps/*' run dev",
+    "build": "pnpm -r --if-present build",
+    "lint": "pnpm -r --if-present lint",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm --filter web test:run",
+    "test:coverage": "pnpm --filter web test:coverage",
+    "test:e2e": "pnpm --filter web test:e2e",
+    "check": "pnpm lint && pnpm typecheck && pnpm test"
+  }
 }

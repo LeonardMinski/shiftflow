@@ -24,7 +24,7 @@ const createShiftSchema = z
     title: z.string().trim().min(1, "Title is required").max(100),
     startTime: z.string().datetime(),
     endTime: z.string().datetime(),
-    employeeId: z.string().trim().optional(),
+    employeeId: z.string().trim().min(1).nullable().optional(),
   })
   .refine((data) => new Date(data.endTime) > new Date(data.startTime), {
     message: "End time must be after start time",
@@ -36,7 +36,7 @@ const updateShiftSchema = z
     title: z.string().trim().min(1).max(100).optional(),
     startTime: z.string().datetime().optional(),
     endTime: z.string().datetime().optional(),
-    employeeId: z.string().trim().optional(),
+    employeeId: z.string().trim().min(1).nullable().optional(),
   })
   .refine(
     (input) =>
@@ -61,12 +61,12 @@ const inputEmployeeAvailabilitySchema = z
     (input) => {
       if (input.available === false) {
         return input.startTime === undefined && input.endTime === undefined;
-      } else {
-        return (
-          Boolean(input.endTime && input.startTime) &&
-          input.startTime! < input.endTime!
-        );
       }
+
+      return (
+        Boolean(input.endTime && input.startTime) &&
+        input.startTime! < input.endTime!
+      );
     },
     {
       message: "Invalid availability times",
@@ -83,28 +83,29 @@ export const typeDefs = `#graphql
   }
 
   type Shift {
-  id: ID!
-  title: String!
-  startTime: String!
-  endTime: String!
-  employee: Employee
-}
+    id: ID!
+    title: String!
+    startTime: String!
+    endTime: String!
+    employeeId: ID
+    employee: Employee
+  }
 
-type EmployeeAvailability {
-  id: ID!
-  employeeId: ID!
-  dayOfWeek: String!
-  available:  Boolean!
-  startTime: String
-  endTime: String
-}
+  type EmployeeAvailability {
+    id: ID!
+    employeeId: ID!
+    dayOfWeek: String!
+    available: Boolean!
+    startTime: String
+    endTime: String
+  }
 
-type Query {
-  employees: [Employee!]!
-  employee(id: ID!): Employee
-  shifts: [Shift!]!
-  shift(id: ID!): Shift
-}
+  type Query {
+    employees: [Employee!]!
+    employee(id: ID!): Employee
+    shifts: [Shift!]!
+    shift(id: ID!): Shift
+  }
 
   input CreateEmployeeInput {
     name: String!
@@ -137,18 +138,21 @@ type Query {
     startTime: String
     endTime: String
   }
-  
+
   type Mutation {
-   createEmployee(input: CreateEmployeeInput!):Employee!
-   updateEmployee(id: ID!, input: UpdateEmployeeInput!):Employee!
-   deleteEmployee(id: ID! ):Employee!
+    createEmployee(input: CreateEmployeeInput!): Employee!
+    updateEmployee(id: ID!, input: UpdateEmployeeInput!): Employee!
+    deleteEmployee(id: ID!): Employee!
 
-   createShift(input: CreateShiftInput!): Shift!
-   updateShift(id: ID!, input: UpdateShiftInput!): Shift!
-   deleteShift(id: ID!): Shift!
+    createShift(input: CreateShiftInput!): Shift!
+    updateShift(id: ID!, input: UpdateShiftInput!): Shift!
+    deleteShift(id: ID!): Shift!
 
-   setEmployeeAvailability(input: EmployeeAvailabilityInput!): EmployeeAvailability!
-   deleteEmployeeAvailability(id: ID!): EmployeeAvailability!
+    setEmployeeAvailability(
+      input: EmployeeAvailabilityInput!
+    ): EmployeeAvailability!
+
+    deleteEmployeeAvailability(id: ID!): EmployeeAvailability!
   }
 `;
 
@@ -175,12 +179,17 @@ type ShiftArgs = {
   id: string;
 };
 
+type ShiftParent = {
+  startTime: Date;
+  endTime: Date;
+};
+
 type CreateShiftArgs = {
   input: {
     title: string;
     startTime: string;
     endTime: string;
-    employeeId?: string;
+    employeeId?: string | null;
   };
 };
 
@@ -190,7 +199,7 @@ type UpdateShiftArgs = {
     title?: string;
     startTime?: string;
     endTime?: string;
-    employeeId?: string;
+    employeeId?: string | null;
   };
 };
 
@@ -205,10 +214,15 @@ type EmployeeAvailabilityArgs = {
 };
 
 type DeleteEmployeeAvailabilityArgs = {
-  id: string
-}
+  id: string;
+};
 
 export const resolvers = {
+  Shift: {
+    startTime: (parent: ShiftParent) => parent.startTime.toISOString(),
+    endTime: (parent: ShiftParent) => parent.endTime.toISOString(),
+  },
+
   Query: {
     employees: async () =>
       prisma.employee.findMany({
@@ -222,7 +236,6 @@ export const resolvers = {
         where: {
           id: args.id,
         },
-
         include: {
           availability: true,
         },
@@ -343,12 +356,13 @@ export const resolvers = {
 
       const data = result.data;
 
-      if (data.employeeId !== undefined) {
+      if (data.employeeId != null) {
         const existingEmployee = await prisma.employee.findUnique({
           where: {
             id: data.employeeId,
           },
         });
+
         if (!existingEmployee) {
           throw new Error("Employee not found");
         }
@@ -386,7 +400,7 @@ export const resolvers = {
         throw new Error("Shift not found");
       }
 
-      if (data.employeeId !== undefined) {
+      if (data.employeeId != null) {
         const existingEmployee = await prisma.employee.findUnique({
           where: {
             id: data.employeeId,
@@ -418,8 +432,10 @@ export const resolvers = {
         },
         data: {
           title: data.title,
-          startTime: data.startTime ? new Date(data.startTime) : undefined,
-          endTime: data.endTime ? new Date(data.endTime) : undefined,
+          startTime:
+            data.startTime !== undefined ? new Date(data.startTime) : undefined,
+          endTime:
+            data.endTime !== undefined ? new Date(data.endTime) : undefined,
           employeeId: data.employeeId,
         },
         include: {
@@ -463,11 +479,12 @@ export const resolvers = {
           id: data.employeeId,
         },
       });
+
       if (!existingEmployee) {
         throw new Error("Employee not found");
       }
 
-      const availability = await prisma.employeeAvailability.upsert({
+      return prisma.employeeAvailability.upsert({
         where: {
           employeeId_dayOfWeek: {
             dayOfWeek: data.dayOfWeek,
@@ -487,26 +504,28 @@ export const resolvers = {
           available: data.available,
         },
       });
-
-      return availability;
     },
 
-    deleteEmployeeAvailability: async (_parent: unknown, args: DeleteEmployeeAvailabilityArgs ) => {
-       const existingEmployeeAvailability = await prisma.employeeAvailability.findUnique({
-         where: {
-           id: args.id,
-         },
-       });
+    deleteEmployeeAvailability: async (
+      _parent: unknown,
+      args: DeleteEmployeeAvailabilityArgs,
+    ) => {
+      const existingEmployeeAvailability =
+        await prisma.employeeAvailability.findUnique({
+          where: {
+            id: args.id,
+          },
+        });
 
-       if (!existingEmployeeAvailability) {
-         throw new Error("Employee availability not found");
-       }
+      if (!existingEmployeeAvailability) {
+        throw new Error("Employee availability not found");
+      }
 
-       return prisma.employeeAvailability.delete({
-         where: {
-           id: args.id,
-         },
-       });
-    }
+      return prisma.employeeAvailability.delete({
+        where: {
+          id: args.id,
+        },
+      });
+    },
   },
 };

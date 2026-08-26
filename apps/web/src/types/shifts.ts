@@ -1,13 +1,15 @@
 import { Employee } from "@/types/employee";
 
 export type Shift = {
-  employeeId: string;
+  employeeId: string | null;
   id: string;
   title: string;
   startTime: string;
   endTime: string;
   employee: Employee | null;
 };
+
+
 
 export type GetShiftsData = {
   shifts: Shift[];
