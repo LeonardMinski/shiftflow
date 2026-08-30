@@ -14,11 +14,27 @@ export default function Availability() {
   } = useQuery<GetEmployeesData>(GET_EMPLOYEES);
 
   if (employeesDataLoading) {
-    return <p>Loading employees...</p>;
+    return (
+      <main className="min-h-[calc(100vh-5rem)] bg-[#fbfaf7] px-5 py-8 text-[#051f12] sm:px-8 lg:px-10">
+        <h1 className="text-3xl font-bold tracking-[-0.03em]">
+          Availability
+        </h1>
+        <p className="text-base text-[#3f433c]">Loading employees...</p>
+      </main>
+    );
   }
 
   if (employeesDataError) {
-    return <p>Failed to load employees.</p>;
+    return (
+      <main className="min-h-[calc(100vh-5rem)] bg-[#fbfaf7] px-5 py-8 text-[#051f12] sm:px-8 lg:px-10">
+        <h1 className="text-3xl font-bold tracking-[-0.03em]">
+          Availability
+        </h1>
+        <p className="mt-4 text-base text-red-700">
+          Failed to load employees.
+        </p>
+      </main>
+    );
   }
 
   if (!employeesData) {
@@ -26,14 +42,25 @@ export default function Availability() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-10 md:px-10 md:py-14">
-      <div className="md:px-10 md:py-14">
-        <AvailabilityList employees={employeesData.employees} />
-      </div>
+    <main className="min-h-[calc(100vh-5rem)] bg-[#fbfaf7] text-[#051f12]">
+      <div className="max-w-7xl px-5 py-8 sm:px-8 lg:px-10">
+        <header className="mb-8 flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+          <div>
+            <h1 className="text-4xl font-extrabold tracking-[-0.04em]">
+              Availability
+            </h1>
+            <p className="mt-2 text-base text-[#3f433c]">
+              Review and manage employee availability schedules.
+            </p>
+          </div>
+        </header>
 
-      <div className="md:px-10 md:py-14">
-        <AvailabilityForm employees={employeesData.employees} />
+        <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_360px]">
+          <AvailabilityList employees={employeesData.employees} />
+
+          <AvailabilityForm employees={employeesData.employees} />
+        </div>
       </div>
-    </div>
+    </main>
   );
 }

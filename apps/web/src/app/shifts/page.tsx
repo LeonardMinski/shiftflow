@@ -216,10 +216,11 @@ export default function DisplayShifts() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#F4F0E8] px-6 py-12 text-black">
-        <div className="mx-auto max-w-6xl">
+      <main className="min-h-[calc(100vh-5rem)] bg-[#fbfaf7] px-5 py-8 text-[#051f12] sm:px-8 lg:px-10">
+        <div className="max-w-7xl">
+          <h1 className="text-3xl font-bold tracking-[-0.03em]">Shifts</h1>
           <SectionLabel>Shift / Directory</SectionLabel>
-          <p className="mt-6 text-lg text-black/50">Loading shifts…</p>
+          <p className="mt-6 text-lg text-[#3f433c]">Loading shifts...</p>
         </div>
       </main>
     );
@@ -227,11 +228,11 @@ export default function DisplayShifts() {
 
   if (error) {
     return (
-      <main className="min-h-screen bg-[#F4F0E8] px-6 py-12 text-black">
-        <div className="mx-auto max-w-6xl">
+      <main className="min-h-[calc(100vh-5rem)] bg-[#fbfaf7] px-5 py-8 text-[#051f12] sm:px-8 lg:px-10">
+        <div className="max-w-7xl">
           <SectionLabel>Something went wrong</SectionLabel>
 
-          <p className="mt-6 max-w-xl text-lg text-black/60">
+          <p className="mt-6 max-w-xl text-lg text-red-700">
             We couldn&apos;t load the shift directory.
           </p>
 
@@ -243,10 +244,11 @@ export default function DisplayShifts() {
 
   if (employeesDataLoading) {
     return (
-      <main className="min-h-screen bg-[#F4F0E8] px-6 py-12 text-black">
-        <div className="mx-auto max-w-6xl">
+      <main className="min-h-[calc(100vh-5rem)] bg-[#fbfaf7] px-5 py-8 text-[#051f12] sm:px-8 lg:px-10">
+        <div className="max-w-7xl">
+          <h1 className="text-3xl font-bold tracking-[-0.03em]">Shifts</h1>
           <SectionLabel>Employee / Directory</SectionLabel>
-          <p className="mt-6 text-lg text-black/50">Loading employees…</p>
+          <p className="mt-6 text-lg text-[#3f433c]">Loading employees...</p>
         </div>
       </main>
     );
@@ -254,11 +256,11 @@ export default function DisplayShifts() {
 
   if (employeesDataError) {
     return (
-      <main className="min-h-screen bg-[#F4F0E8] px-6 py-12 text-black">
-        <div className="mx-auto max-w-6xl">
+      <main className="min-h-[calc(100vh-5rem)] bg-[#fbfaf7] px-5 py-8 text-[#051f12] sm:px-8 lg:px-10">
+        <div className="max-w-7xl">
           <SectionLabel>Something went wrong</SectionLabel>
 
-          <p className="mt-6 max-w-xl text-lg text-black/60">
+          <p className="mt-6 max-w-xl text-lg text-red-700">
             We couldn&apos;t load the employee directory.
           </p>
 
@@ -281,10 +283,19 @@ export default function DisplayShifts() {
   );
 
   return (
-    <>
-      <main className="min-h-screen bg-[#F4F0E8] text-[#171717]">
-        <div className="mx-auto max-w-6xl px-6 py-10 md:px-10 md:py-14">
-          <div className="mb-8">
+    <main className="min-h-[calc(100vh-5rem)] bg-[#fbfaf7] text-[#051f12]">
+      <div className="max-w-7xl px-5 py-8 sm:px-8 lg:px-10">
+        <header className="mb-8 flex flex-col gap-5 border-b border-[#c6cbc2] pb-8 xl:flex-row xl:items-end xl:justify-between">
+          <div>
+            <h1 className="text-4xl font-extrabold tracking-[-0.04em]">
+              Shifts
+            </h1>
+            <p className="mt-2 text-base text-[#3f433c]">
+              Create, assign, edit, and filter scheduled shifts.
+            </p>
+          </div>
+
+          <div className="xl:min-w-[520px]">
             <ShiftFilter
               selectedEmployeeFilter={selectedEmployeeFilter}
               employees={employeesData.employees}
@@ -293,35 +304,34 @@ export default function DisplayShifts() {
               onSearchChange={setSearchTerm}
             />
           </div>
+        </header>
 
-          <div className="grid gap-10 lg:grid-cols-[1.4fr_0.8fr]">
-            <ShiftList
-              shifts={filteredShifts}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              updating={updating}
-              deletingShiftId={deletingShiftId}
-            />
-            <ShiftForm
-              title={title}
-              errors={errors}
-              startTime={startTime}
-              endTime={endTime}
-              employeeId={employeeId}
-              employees={employeesData.employees}
-              creating={creating}
-              updating={updating}
-              editShift={editShift}
-              onTitleChange={handleTitleChange}
-              onStartTimeChange={handleStartTimeChange}
-              onEndTimeChange={handleEndTimeChange}
-              onEmployeeChange={handleEmployeeChange}
-              onSubmit={handleSubmit}
-            />
-          </div>
-         
+        <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_420px]">
+          <ShiftList
+            shifts={filteredShifts}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            updating={updating}
+            deletingShiftId={deletingShiftId}
+          />
+          <ShiftForm
+            title={title}
+            errors={errors}
+            startTime={startTime}
+            endTime={endTime}
+            employeeId={employeeId}
+            employees={employeesData.employees}
+            creating={creating}
+            updating={updating}
+            editShift={editShift}
+            onTitleChange={handleTitleChange}
+            onStartTimeChange={handleStartTimeChange}
+            onEndTimeChange={handleEndTimeChange}
+            onEmployeeChange={handleEmployeeChange}
+            onSubmit={handleSubmit}
+          />
         </div>
-      </main>
-    </>
+      </div>
+    </main>
   );
 }

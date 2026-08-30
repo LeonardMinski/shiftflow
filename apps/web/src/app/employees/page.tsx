@@ -22,7 +22,6 @@ import {
 
 import { GET_EMPLOYEES } from "@/graphql/employees/queries";
 
-import { SectionLabel } from "@/components/ui/SectionLabel";
 import { EmployeeList } from "@/components/employees/EmployeeList";
 import { EmployeeForm } from "@/components/employees/EmployeeForm";
 
@@ -116,10 +115,10 @@ export default function DisplayEmployees() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#F4F0E8] px-6 py-12 text-black">
-        <div className="mx-auto max-w-6xl">
-          <SectionLabel>People / Directory</SectionLabel>
-          <p className="mt-6 text-lg text-black/50">Loading team…</p>
+      <main className="min-h-[calc(100vh-5rem)] bg-[#fbfaf7] px-5 py-8 text-[#051f12] sm:px-8 lg:px-10">
+        <div className="max-w-7xl">
+          <h1 className="text-3xl font-bold tracking-[-0.03em]">Employees</h1>
+          <p className="text-base text-[#3f433c]">Loading team...</p>
         </div>
       </main>
     );
@@ -127,15 +126,16 @@ export default function DisplayEmployees() {
 
   if (error) {
     return (
-      <main className="min-h-screen bg-[#F4F0E8] px-6 py-12 text-black">
-        <div className="mx-auto max-w-6xl">
-          <SectionLabel>Something went wrong</SectionLabel>
-
-          <p className="mt-6 max-w-xl text-lg text-black/60">
+      <main className="min-h-[calc(100vh-5rem)] bg-[#fbfaf7] px-5 py-8 text-[#051f12] sm:px-8 lg:px-10">
+        <div className="max-w-7xl">
+          <h1 className="text-3xl font-bold tracking-[-0.03em]">Employees</h1>
+          <p className="mt-4 max-w-xl text-base text-red-700">
             We couldn&apos;t load the employee directory.
           </p>
 
-          <p className="mt-2 font-mono text-sm text-red-700">{error.message}</p>
+          <p className="mt-2 font-mono text-sm text-red-700">
+            {error.message}
+          </p>
         </div>
       </main>
     );
@@ -144,47 +144,27 @@ export default function DisplayEmployees() {
   if (!data) return null;
 
   return (
-    <main className="min-h-screen bg-[#F4F0E8] text-[#171717]">
-      <div className="mx-auto max-w-6xl px-6 py-10 md:px-10 md:py-14">
-        <header
-          className="
-            mb-14 grid gap-10
-            border-b border-black/10 pb-10
-            md:grid-cols-[1.35fr_0.65fr]
-            md:items-end
-          "
-        >
+    <main className="min-h-[calc(100vh-5rem)] bg-[#fbfaf7] text-[#051f12]">
+      <div className="max-w-7xl px-5 py-8 sm:px-8 lg:px-10">
+        <header className="mb-8 flex flex-col gap-5 border-b border-[#c6cbc2] pb-8 xl:flex-row xl:items-end xl:justify-between">
           <div>
-            <SectionLabel>People / Directory</SectionLabel>
-
-            <h1
-              className="
-                mt-4 max-w-3xl text-5xl font-semibold
-                leading-[0.95] tracking-tighter
-                sm:text-6xl md:text-7xl
-              "
-            >
-              Your team,
-              <br />
-              without the noise.
+            <h1 className="text-4xl font-extrabold tracking-[-0.04em]">
+              Employees
             </h1>
-          </div>
-
-          <div className="max-w-md md:justify-self-end">
-            <p className="text-base leading-7 text-black/55">
-              A lightweight employee directory focused on clarity, accessibility
-              and maintainable frontend architecture.
+            <p className="mt-2 text-base text-[#3f433c]">
+              Manage staff directory and access controls.
             </p>
-
-            <div className="mt-6 flex gap-6 font-mono text-xs uppercase tracking-[0.12em] text-black/35">
-              <span>React</span>
-              <span>TypeScript</span>
-              <span>GraphQL</span>
-            </div>
           </div>
+
+          <a
+            href="#employee-form"
+            className="inline-flex h-11 items-center justify-center bg-[#052311] px-5 text-sm font-bold text-white transition hover:bg-[#173f27] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#092514] focus-visible:ring-offset-2 xl:self-center"
+          >
+            Add Employee
+          </a>
         </header>
 
-        <div className="grid gap-14 lg:grid-cols-[1.45fr_0.75fr]">
+        <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_360px]">
           <EmployeeList
             employees={data.employees}
             onEdit={handleEdit}

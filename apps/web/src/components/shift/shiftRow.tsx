@@ -1,4 +1,5 @@
 import type { Shift } from "@/types/shifts";
+import { CalendarClock, Trash2 } from "lucide-react";
 
 import {
   AlertDialog,
@@ -21,6 +22,12 @@ type ShiftRowProps = {
   deleting: boolean;
 };
 
+const formatShiftDisplayTime = (value: string) =>
+  new Date(value).toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
 export default function ShiftRow({
   shift,
   index,
@@ -29,58 +36,54 @@ export default function ShiftRow({
   updating,
   deleting,
 }: ShiftRowProps) {
-  const startTime = new Date(Number(shift.startTime)).toLocaleTimeString(
-    "en-GB",
-    {
-      hour: "2-digit",
-      minute: "2-digit",
-    },
-  );
-
-  const endTime = new Date(Number(shift.endTime)).toLocaleTimeString("en-GB", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const startTime = formatShiftDisplayTime(shift.startTime);
+  const endTime = formatShiftDisplayTime(shift.endTime);
 
   return (
     <article
       className="
-        group grid gap-4
-        border-b border-black/10 py-5
-        transition hover:bg-black/2.5
+        grid gap-4 border-b border-[#c6cbc2] px-5 py-5
+        transition last:border-b-0 hover:bg-[#fbfaf7]
         sm:grid-cols-[48px_1fr_auto]
         sm:items-center
       "
     >
-      <span className="font-mono text-xs text-black/30">
-        {String(index + 1).padStart(2, "0")}
+      <span className="flex size-10 items-center justify-center rounded-full bg-[#f6f3ed] text-[#52642b]">
+        <CalendarClock className="size-5" aria-hidden />
+        <span className="sr-only">
+          Shift {String(index + 1).padStart(2, "0")}
+        </span>
       </span>
 
       <div className="min-w-0">
         <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <h3 className="text-base font-medium tracking-[-0.01em]">
+          <h3 className="text-lg font-medium tracking-[-0.02em]">
             {shift.title}
           </h3>
 
-          <span className="font-mono text-xs text-black/35">
-            {startTime} — {endTime}
+          <span className="font-mono text-sm text-[#051f12]">
+            {startTime} - {endTime}
           </span>
         </div>
 
         <div className="mt-2 flex items-center gap-2">
           <span
             className={`
-              inline-block h-2 w-2 rounded-full
-              ${shift.employee ? "bg-black/60" : "bg-[#FF5A36]"}
+              inline-block size-2 rounded-full
+              ${shift.employee ? "bg-[#052311]" : "border border-red-700"}
             `}
             aria-hidden="true"
           />
 
-          <p className="text-sm text-black/45">
+          <p className="text-sm text-[#3f433c]">
             {shift.employee ? shift.employee.name : "Unassigned"}
           </p>
         </div>
       </div>
+
+      <span className="hidden font-mono text-xs text-black/30">
+        {String(index + 1).padStart(2, "0")}
+      </span>
 
       <div className="flex items-center gap-3">
         <button
@@ -88,8 +91,9 @@ export default function ShiftRow({
           onClick={() => onEdit(shift)}
           disabled={updating}
           className="
-            text-sm text-black/45 transition
-            hover:text-black
+            text-sm font-medium text-[#52642b] transition
+            hover:text-[#092514] focus-visible:outline-none
+            focus-visible:ring-2 focus-visible:ring-[#092514]
             disabled:cursor-not-allowed
             disabled:opacity-40
           "
@@ -101,11 +105,12 @@ export default function ShiftRow({
           <AlertDialogTrigger
             disabled={deleting}
             className="
-              text-sm text-red-700 transition
-              hover:text-red-900
+              inline-flex items-center gap-1 text-sm font-medium text-red-700 transition
+              hover:text-red-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700
               disabled:opacity-40
             "
           >
+            <Trash2 className="size-4" aria-hidden />
             {deleting ? "Deleting…" : "Delete"}
           </AlertDialogTrigger>
 

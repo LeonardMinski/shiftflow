@@ -1,10 +1,20 @@
+import type { ReactNode } from "react";
+
+import { cn } from "@/lib/utils";
+
 type SectionLabelProps = {
-  children: React.ReactNode;
+  children: ReactNode;
+  className?: string;
 };
 
-export function SectionLabel({ children }: SectionLabelProps) {
+export function SectionLabel({ children, className }: SectionLabelProps) {
   return (
-    <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-black/40">
+    <p
+      className={cn(
+        "font-mono text-[11px] uppercase tracking-[0.2em] text-black/40",
+        className,
+      )}
+    >
       {children}
     </p>
   );

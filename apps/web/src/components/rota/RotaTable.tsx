@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { AlertTriangle, CalendarPlus } from "lucide-react";
+
 import { formatShiftTime, getShiftsForEmployeeOnDay } from "@/lib/rota/rota";
 
 import { Employee, Shift } from "@/types";
@@ -13,35 +16,52 @@ export default function RotaTable({
   shifts,
   weekDays,
 }: RotaTableProps) {
+  const today = new Date();
+  const hasVisibleShifts = employees.some((employee) =>
+    weekDays.some(
+      (day) => getShiftsForEmployeeOnDay(employee.id, day, shifts).length > 0,
+    ),
+  );
+
   return (
-    <div className="overflow-x-auto border border-black/10 bg-[#EAE4D9]">
-      <table className="min-w-225 w-full border-collapse">
+    <div className="relative min-h-[calc(100vh-10.5rem)] overflow-x-auto bg-[#fbfaf7]">
+      <table className="min-w-[1120px] w-full border-collapse">
         <thead>
-          <tr className="border-b border-black/10">
-            <th className="min-w-40 bg-[#EAE4D9] p-5 text-left">
-              <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-black/45">
-                Employee
+          <tr className="border-b border-[#c6cbc2]">
+            <th className="w-48 bg-[#f6f3ed] p-5 text-left">
+              <span className="text-sm font-medium uppercase tracking-[0.08em] text-[#52642b]">
+                Employees
               </span>
             </th>
 
-            {weekDays.map((day) => (
-              <th
-                key={day.toISOString()}
-                className="min-w-27.5 border-l border-black/10 bg-[#EAE4D9] p-5 text-left"
-              >
-                <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-black/45">
-                  {day.toLocaleDateString("en-GB", {
-                    weekday: "short",
-                  })}
-                </span>
+            {weekDays.map((day) => {
+              const isToday =
+                day.getFullYear() === today.getFullYear() &&
+                day.getMonth() === today.getMonth() &&
+                day.getDate() === today.getDate();
 
-                <p className="mt-1 text-lg font-semibold tracking-[-0.03em]">
-                  {day.toLocaleDateString("en-GB", {
-                    day: "numeric",
-                  })}
-                </p>
-              </th>
-            ))}
+              return (
+                <th
+                  key={day.toISOString()}
+                  className="w-40 border-l border-[#c6cbc2] bg-[#f6f3ed] p-5 text-center"
+                >
+                  <span className="block text-sm font-medium uppercase tracking-[0.08em] text-[#52642b]">
+                    {day.toLocaleDateString("en-GB", {
+                      weekday: "short",
+                    })}{" "}
+                    {day.toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                    })}
+                  </span>
+
+                  {isToday && (
+                    <span className="mt-1 block text-xs font-extrabold uppercase text-[#092514]">
+                      Today
+                    </span>
+                  )}
+                </th>
+              );
+            })}
           </tr>
         </thead>
 
@@ -49,16 +69,31 @@ export default function RotaTable({
           {employees.map((employee) => (
             <tr
               key={employee.id}
-              className="border-b border-black/10 last:border-b-0"
+              className="border-b border-[#c6cbc2] last:border-b-0"
             >
-              <td className="bg-[#EAE4D9] p-5 align-top">
-                <p className="font-semibold tracking-[-0.02em]">
-                  {employee.name}
-                </p>
+              <td className="bg-[#fbfaf7] p-5 align-middle">
+                <div className="flex items-center gap-4">
+                  <span
+                    className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#ffdda8] text-sm font-medium text-[#051f12]"
+                    aria-hidden
+                  >
+                    {employee.name
+                      .split(" ")
+                      .map((part) => part[0])
+                      .join("")
+                      .slice(0, 2)
+                      .toUpperCase()}
+                  </span>
 
-                <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-black/35">
-                  Team member
-                </p>
+                  <div className="min-w-0">
+                    <p className="truncate font-medium tracking-[-0.01em]">
+                      {employee.name}
+                    </p>
+                    <p className="mt-1 truncate font-mono text-xs text-[#52642b]">
+                      Team member
+                    </p>
+                  </div>
+                </div>
               </td>
 
               {weekDays.map((day) => {
@@ -71,7 +106,7 @@ export default function RotaTable({
                 return (
                   <td
                     key={day.toISOString()}
-                    className="border-l border-black/10 bg-[#F4F0E8] p-3 align-top"
+                    className="h-28 border-l border-[#c6cbc2] bg-white p-3 align-top"
                   >
                     {matchingShifts.length > 0 ? (
                       <div className="space-y-2">
@@ -79,26 +114,33 @@ export default function RotaTable({
                           <div
                             key={shift.id}
                             className="
-                              border border-black/10
-                              bg-[#EAE4D9]
-                              p-3
-                              transition
-                              hover:border-[#FF5A36]/50
+                              border border-[#c6cbc2] bg-[#ffdda8]
+                              p-3 text-left transition
+                              hover:border-[#092514]
                             "
                           >
-                            <p className="text-sm font-semibold tracking-[-0.02em]">
-                              {shift.title}
-                            </p>
+                            <div className="flex items-start justify-between gap-2">
+                              <p className="text-sm font-medium leading-5">
+                                {shift.title}
+                              </p>
 
-                            <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.12em] text-black/45">
-                              {formatShiftTime(shift.startTime)} –{" "}
+                              {shift.employeeId === null && (
+                                <AlertTriangle
+                                  className="size-4 shrink-0 text-red-700"
+                                  aria-label="Unassigned shift"
+                                />
+                              )}
+                            </div>
+
+                            <p className="mt-2 font-mono text-sm text-[#051f12]">
+                              {formatShiftTime(shift.startTime)}-
                               {formatShiftTime(shift.endTime)}
                             </p>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <span className="font-mono text-xs text-black/25">—</span>
+                      <span className="sr-only">No shifts scheduled</span>
                     )}
                   </td>
                 );
@@ -107,6 +149,30 @@ export default function RotaTable({
           ))}
         </tbody>
       </table>
+
+      {!hasVisibleShifts && (
+        <div className="pointer-events-none absolute inset-x-4 top-1/2 flex -translate-y-1/2 justify-center lg:inset-x-10">
+          <div className="pointer-events-auto w-full max-w-xl border border-[#c6cbc2] bg-white p-10 text-center shadow-sm">
+            <div className="mx-auto flex size-20 items-center justify-center rounded-full bg-[#f6f3ed]">
+              <CalendarPlus className="size-9 text-[#092514]" aria-hidden />
+            </div>
+            <h2 className="mt-8 text-2xl font-bold tracking-[-0.03em]">
+              No shifts scheduled
+            </h2>
+            <p className="mx-auto mt-4 max-w-md text-base leading-7 text-[#3f433c]">
+              No shifts scheduled this week. Add the first shift from the shift
+              manager.
+            </p>
+            <Link
+              href="/shifts"
+              className="mt-8 inline-flex h-11 items-center gap-2 bg-[#052311] px-5 text-sm font-bold text-white transition hover:bg-[#173f27] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#092514] focus-visible:ring-offset-2"
+            >
+              <CalendarPlus className="size-4" aria-hidden />
+              Add Shift
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

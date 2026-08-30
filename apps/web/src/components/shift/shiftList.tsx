@@ -1,5 +1,4 @@
 import ShiftRow from "@/components/shift/shiftRow";
-import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Shift } from "@/types/shifts";
 
 type ShiftListProps = {
@@ -19,39 +18,27 @@ export default function ShiftList({
 }: ShiftListProps) {
   return (
     <section aria-labelledby="shift-list-heading">
-      <div className="mb-6 flex items-end justify-between gap-6">
-        <div>
-          <SectionLabel>Schedule</SectionLabel>
+      <div className="mb-5 flex items-end justify-between gap-6">
+        <h2
+          id="shift-list-heading"
+          className="text-2xl font-bold tracking-[-0.03em]"
+        >
+          Current shifts
+        </h2>
 
-          <h2
-            id="shift-list-heading"
-            className="mt-2 text-2xl font-semibold tracking-[-0.03em]"
-          >
-            Current shifts
-          </h2>
-        </div>
-
-        <div className="text-right">
-          <span className="block font-mono text-2xl tracking-[-0.04em]">
-            {String(shifts.length).padStart(2, "0")}
-          </span>
-
-          <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-black/35">
-            shifts
-          </span>
-        </div>
+        <p className="font-mono text-sm text-[#52642b]">
+          {String(shifts.length).padStart(2, "0")} shifts
+        </p>
       </div>
 
-      <div className="border-t border-black/10">
+      <div className="overflow-hidden border border-[#c6cbc2] bg-white">
         {shifts.length === 0 ? (
-          <div className="py-16">
-            <SectionLabel>Empty state</SectionLabel>
-
-            <h3 className="mt-3 text-2xl font-medium tracking-[-0.03em]">
+          <div className="px-5 py-16 text-center">
+            <h3 className="text-2xl font-semibold tracking-[-0.03em]">
               No shifts scheduled.
             </h3>
 
-            <p className="mt-2 max-w-sm text-sm leading-6 text-black/50">
+            <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-[#3f433c]">
               Create the first shift using the form alongside the schedule.
             </p>
           </div>

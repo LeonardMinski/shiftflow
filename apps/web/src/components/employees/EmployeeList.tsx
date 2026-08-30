@@ -1,5 +1,4 @@
 import { EmployeeRow } from "@/components/employees/EmployeeRow";
-import { SectionLabel } from "@/components/ui/SectionLabel";
 import type { Employee } from "@/types";
 
 type EmployeeListProps = {
@@ -17,40 +16,26 @@ export function EmployeeList({
 }: EmployeeListProps) {
   return (
     <section aria-labelledby="employee-list-heading">
-      <div className="mb-6 flex items-end justify-between gap-6">
-        <div>
-          <SectionLabel>Directory</SectionLabel>
+      <h2 id="employee-list-heading" className="sr-only">
+        Current employees
+      </h2>
 
-          <h2
-            id="employee-list-heading"
-            className="mt-2 text-2xl font-semibold tracking-[-0.03em]"
-          >
-            Current employees
-          </h2>
+      <div className="overflow-hidden border border-[#c6cbc2] bg-white">
+        <div className="grid grid-cols-[minmax(0,1fr)_130px_200px_150px] border-b border-[#c6cbc2] bg-[#f6f3ed] px-5 py-4 text-sm uppercase tracking-[0.08em] text-[#051f12] max-lg:hidden">
+          <span>Employee</span>
+          <span>Role</span>
+          <span>Availability Summary</span>
+          <span className="text-right">Actions</span>
         </div>
 
-        <div className="text-right">
-          <span className="block font-mono text-2xl tracking-[-0.04em]">
-            {String(employees.length).padStart(2, "0")}
-          </span>
-
-          <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-black/35">
-            people
-          </span>
-        </div>
-      </div>
-
-      <div className="border-t border-black/10">
         {employees.length === 0 ? (
-          <div className="py-16">
-            <SectionLabel>Empty state</SectionLabel>
-
-            <h3 className="mt-3 text-2xl font-medium tracking-[-0.03em]">
-              Nobody here yet.
+          <div className="px-5 py-16 text-center">
+            <h3 className="text-2xl font-semibold tracking-[-0.03em]">
+              No employees yet.
             </h3>
 
-            <p className="mt-2 max-w-sm text-sm leading-6 text-black/50">
-              Add your first employee using the form alongside the directory.
+            <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-[#3f433c]">
+              Add your first employee using the directory form.
             </p>
           </div>
         ) : (
@@ -66,6 +51,10 @@ export function EmployeeList({
           ))
         )}
       </div>
+
+      <p className="mt-6 text-sm text-[#3f433c]">
+        Showing 1 to {employees.length} of {employees.length} employees
+      </p>
     </section>
   );
 }

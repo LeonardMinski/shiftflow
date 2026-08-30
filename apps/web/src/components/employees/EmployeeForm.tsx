@@ -29,17 +29,17 @@ export function EmployeeForm({
   onCancelEdit,
 }: EmployeeFormProps) {
   return (
-    <aside className="lg:sticky lg:top-8 lg:self-start">
-      <div className="border border-black/10 bg-[#EAE4D9] p-6 md:p-8">
-        <SectionLabel>
+    <aside id="employee-form" className="scroll-mt-28 xl:sticky xl:top-28 xl:self-start">
+      <div className="border border-[#c6cbc2] bg-[#f6f3ed] p-6 md:p-7">
+        <SectionLabel className="text-[#52642b]">
           {editingEmployee ? "Edit person" : "Add person"}
         </SectionLabel>
 
-        <h2 className="mt-3 text-3xl font-semibold tracking-[-0.04em]">
+        <h2 className="mt-3 text-2xl font-bold tracking-[-0.03em]">
           {editingEmployee ? "Edit employee" : "New employee"}
         </h2>
 
-        <p className="mt-2 max-w-sm text-sm leading-6 text-black/50">
+        <p className="mt-2 max-w-sm text-sm leading-6 text-[#3f433c]">
           {editingEmployee
             ? "Update this employee's details."
             : "Add a team member to the shared directory."}
@@ -67,16 +67,16 @@ export function EmployeeForm({
             type="submit"
             disabled={creating || updating}
             className="
-              mt-2 flex w-full items-center justify-between
+              mt-2 flex h-11 w-full items-center justify-between
               bg-[#171717] px-5 py-3.5
               text-sm font-medium text-white
               transition
-              hover:bg-[#FF5A36]
+              hover:bg-[#173f27]
               focus-visible:outline-none
               focus-visible:ring-2
-              focus-visible:ring-[#FF5A36]
+              focus-visible:ring-[#092514]
               focus-visible:ring-offset-2
-              focus-visible:ring-offset-[#EAE4D9]
+              focus-visible:ring-offset-[#f6f3ed]
               disabled:cursor-not-allowed
               disabled:opacity-40
             "
@@ -98,7 +98,7 @@ export function EmployeeForm({
             <Button
               type="button"
               onClick={onCancelEdit}
-              className="w-full text-sm text-black/45 transition hover:text-black"
+              className="w-full bg-transparent text-sm text-[#52642b] transition hover:text-[#092514]"
             >
               Cancel edit
             </Button>
