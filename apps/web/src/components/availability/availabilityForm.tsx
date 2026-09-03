@@ -13,11 +13,10 @@ import { Employee } from "@/types/employee";
 import { Save } from "lucide-react";
 
 type AvailabilityFormProps = {
-  employees: Employee[];
+  employee: Employee;
 };
 
-export default function AvailabilityForm({ employees }: AvailabilityFormProps) {
-  const [employeeId, setEmployeeId] = useState("");
+export default function AvailabilityForm({ employee }: AvailabilityFormProps) {
   const [dayOfWeek, setDayOfWeek] = useState("");
   const [available, setAvailable] = useState(false);
   const [startTime, setStartTime] = useState("");
@@ -34,7 +33,7 @@ export default function AvailabilityForm({ employees }: AvailabilityFormProps) {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (employeeId === "" || dayOfWeek === "") return;
+    if (dayOfWeek === "") return;
 
     if (available && (startTime === "" || endTime === "")) {
       return;
@@ -44,7 +43,7 @@ export default function AvailabilityForm({ employees }: AvailabilityFormProps) {
       variables: {
         input: {
           available,
-          employeeId,
+          employeeId: employee.id,
           dayOfWeek,
           ...(available && {
             startTime,
@@ -56,15 +55,14 @@ export default function AvailabilityForm({ employees }: AvailabilityFormProps) {
 
     setAvailable(false);
     setDayOfWeek("");
-    setEmployeeId("");
     setEndTime("");
     setStartTime("");
   };
 
   return (
-    <section className="border border-[#c6cbc2] bg-[#f6f3ed] p-6 md:p-7 xl:sticky xl:top-28 xl:self-start">
+    <section className="rounded-lg border border-border bg-muted p-6 md:p-7 xl:sticky xl:top-28 xl:self-start">
       <div className="mb-8">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-[#52642b]">
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
           Availability / Editor
         </p>
 
@@ -72,42 +70,16 @@ export default function AvailabilityForm({ employees }: AvailabilityFormProps) {
           Set availability
         </h2>
 
-        <p className="mt-2 max-w-md text-sm leading-6 text-[#3f433c]">
-          Choose an employee and define whether they are available for a
-          particular day.
+        <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
+          Define whether {employee.name} is available for a particular day.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label
-            htmlFor="availabilityEmployee"
-            className="mb-2 block text-sm font-semibold text-[#52642b]"
-          >
-            Employee
-          </label>
-
-          <select
-            name="employee"
-            id="availabilityEmployee"
-            value={employeeId}
-            onChange={(e) => setEmployeeId(e.target.value)}
-            className="h-12 w-full border border-[#c6cbc2] bg-white px-4 text-sm outline-none transition focus:border-[#092514] focus:ring-2 focus:ring-[#092514]/20"
-          >
-            <option value="">Select employee</option>
-
-            {employees.map((employee) => (
-              <option key={employee.id} value={employee.id}>
-                {employee.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label
             htmlFor="dayOfWeek"
-            className="mb-2 block text-sm font-semibold text-[#52642b]"
+            className="mb-2 block text-sm font-semibold text-muted-foreground"
           >
             Day of week
           </label>
@@ -117,7 +89,7 @@ export default function AvailabilityForm({ employees }: AvailabilityFormProps) {
             id="dayOfWeek"
             value={dayOfWeek}
             onChange={(e) => setDayOfWeek(e.target.value)}
-            className="h-12 w-full border border-[#c6cbc2] bg-white px-4 text-sm outline-none transition focus:border-[#092514] focus:ring-2 focus:ring-[#092514]/20"
+            className="h-12 w-full rounded-lg border border-border bg-card px-4 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/20"
           >
             <option value="">Select day</option>
             <option value="Monday">Monday</option>
@@ -130,13 +102,13 @@ export default function AvailabilityForm({ employees }: AvailabilityFormProps) {
           </select>
         </div>
 
-        <div className="flex items-center justify-between border-y border-[#c6cbc2] py-4">
+        <div className="flex items-center justify-between border-y border-border py-4">
           <div>
             <label htmlFor="available" className="block text-sm font-semibold">
               Employee available
             </label>
 
-            <p className="mt-1 text-xs text-[#3f433c]">
+            <p className="mt-1 text-xs text-muted-foreground">
               Enable this to add working hours.
             </p>
           </div>
@@ -147,7 +119,7 @@ export default function AvailabilityForm({ employees }: AvailabilityFormProps) {
             id="available"
             checked={available}
             onChange={(e) => setAvailable(e.target.checked)}
-            className="size-5 accent-[#052311] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#092514]"
+            className="size-5 accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
 
@@ -156,7 +128,7 @@ export default function AvailabilityForm({ employees }: AvailabilityFormProps) {
             <div>
               <label
                 htmlFor="startTime"
-                className="mb-2 block text-sm font-semibold text-[#52642b]"
+                className="mb-2 block text-sm font-semibold text-muted-foreground"
               >
                 Start time
               </label>
@@ -167,14 +139,14 @@ export default function AvailabilityForm({ employees }: AvailabilityFormProps) {
                 name="startTime"
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
-                className="h-12 w-full border border-[#c6cbc2] bg-white px-4 text-sm outline-none transition focus:border-[#092514] focus:ring-2 focus:ring-[#092514]/20"
+                className="h-12 w-full rounded-lg border border-border bg-card px-4 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/20"
               />
             </div>
 
             <div>
               <label
                 htmlFor="endTime"
-                className="mb-2 block text-sm font-semibold text-[#52642b]"
+                className="mb-2 block text-sm font-semibold text-muted-foreground"
               >
                 End time
               </label>
@@ -185,7 +157,7 @@ export default function AvailabilityForm({ employees }: AvailabilityFormProps) {
                 name="endTime"
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
-                className="h-12 w-full border border-[#c6cbc2] bg-white px-4 text-sm outline-none transition focus:border-[#092514] focus:ring-2 focus:ring-[#092514]/20"
+                className="h-12 w-full rounded-lg border border-border bg-card px-4 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/20"
               />
             </div>
           </div>
@@ -194,7 +166,7 @@ export default function AvailabilityForm({ employees }: AvailabilityFormProps) {
         <button
           type="submit"
           disabled={creating}
-          className="inline-flex h-11 w-full items-center justify-center gap-2 bg-[#052311] px-5 text-sm font-bold text-white transition hover:bg-[#173f27] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#092514] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary px-5 text-sm font-bold text-primary-foreground transition hover:bg-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Save className="size-4" aria-hidden />
           {creating ? "Saving..." : "Save Schedule"}

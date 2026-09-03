@@ -1,5 +1,3 @@
-import { Shift } from "@/types";
-
 export const isSameDay = (dateA: Date, dateB: Date): boolean => {
   return (
     dateA.getFullYear() === dateB.getFullYear() &&
@@ -8,11 +6,16 @@ export const isSameDay = (dateA: Date, dateB: Date): boolean => {
   );
 };
 
-export const getShiftsForEmployeeOnDay = (
+type ShiftLike = {
+  employeeId: string | null;
+  startTime: string;
+};
+
+export const getShiftsForEmployeeOnDay = <T extends ShiftLike>(
   employeeId: string,
   day: Date,
-  shifts: Shift[],
-): Shift[] => {
+  shifts: T[],
+): T[] => {
   return shifts.filter(
     (shift) =>
       shift.employeeId === employeeId &&
@@ -42,6 +45,21 @@ export const getStartOfTheWeek = (date: Date): Date => {
   monday.setHours(0, 0, 0, 0);
 
   return monday;
+};
+
+/**
+ * A timezone-stable key for the week a (local) Monday `weekStart` belongs to.
+ * `weekStart.toISOString()` would re-express local midnight in UTC, which
+ * shifts the calendar date for any non-UTC-zero timezone - silently
+ * corrupting week-boundary comparisons (e.g. publish state) for anyone not
+ * on UTC. This instead takes the local Y/M/D directly as the key.
+ */
+export const toWeekStartKey = (weekStart: Date): string => {
+  const year = weekStart.getFullYear();
+  const month = String(weekStart.getMonth() + 1).padStart(2, "0");
+  const day = String(weekStart.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}T00:00:00.000Z`;
 };
 
 export const formatShiftTime = (time: string): string => {

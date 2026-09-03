@@ -1,4 +1,5 @@
 import type { Employee } from "@/types";
+import { getInitials } from "@/lib/utils";
 
 import {
   AlertDialog,
@@ -26,98 +27,72 @@ export function EmployeeRow({
   onDelete,
   deleting,
 }: EmployeeRowProps) {
-  const initials = employee.name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+  const availableDays = employee.availability.filter(
+    (record) => record.available,
+  ).length;
 
   return (
-    <article
-      className="
-        grid gap-4 border-b border-[#c6cbc2] px-5 py-5
-        transition last:border-b-0 hover:bg-[#fbfaf7]
-        lg:grid-cols-[minmax(0,1fr)_130px_200px_150px]
-        lg:items-center
-      "
-    >
+    <article className="flex flex-col gap-4 border-b border-border px-5 py-4 transition last:border-b-0 hover:bg-muted/50 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex min-w-0 items-center gap-4">
         <div
-          className="
-            flex size-12 shrink-0 items-center justify-center rounded-full
-            border border-[#f3c987] bg-[#ffdda8]
-            text-lg font-medium tracking-wide
-          "
+          className="flex size-11 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-medium text-accent-foreground"
           aria-hidden="true"
         >
-          {initials}
+          {getInitials(employee.name)}
         </div>
 
         <div className="min-w-0">
-          <h3 className="truncate text-lg font-medium tracking-[-0.02em]">
+          <h3 className="truncate text-base font-medium tracking-[-0.01em] text-foreground">
             {employee.name}
           </h3>
-
-          <p className="mt-1 truncate text-sm text-[#3f433c]">
+          <p className="truncate text-sm text-muted-foreground">
             {employee.email}
           </p>
         </div>
       </div>
 
-      <div>
-        <span className="inline-flex border border-[#c6cbc2] bg-[#efede8] px-3 py-1 font-mono text-xs">
-          Team
+      <div className="flex items-center gap-4 sm:shrink-0">
+        <span className="inline-flex rounded-full bg-accent px-3 py-1 text-xs font-medium text-accent-foreground">
+          Available {availableDays} {availableDays === 1 ? "day" : "days"}
         </span>
-      </div>
 
-      <p className="text-sm leading-6 text-[#051f12]">
-        {employee.availability.length}{" "}
-        {employee.availability.length === 1 ? "day" : "days"} available
-        {employee.availability.length > 0 && (
-          <span className="block text-[#3f433c]">
-            {employee.availability
-              .map((availability) => availability.dayOfWeek.slice(0, 3))
-              .join(", ")}
-          </span>
-        )}
-      </p>
-
-      <div className="flex items-center gap-3 lg:justify-end">
-        <button
-          type="button"
-          onClick={() => onEdit(employee)}
-          className="text-sm font-medium text-[#52642b] transition hover:text-[#092514] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#092514]"
-        >
-          Edit
-        </button>
-
-        <AlertDialog>
-          <AlertDialogTrigger
-            disabled={deleting}
-            className="text-sm font-medium text-red-700 transition hover:text-red-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700 disabled:opacity-40"
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => onEdit(employee)}
+            className="text-sm font-medium text-primary transition hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            Delete
-          </AlertDialogTrigger>
+            Edit
+          </button>
 
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete {employee.name}?</AlertDialogTitle>
+          <AlertDialog>
+            <AlertDialogTrigger
+              disabled={deleting}
+              className="text-sm font-medium text-destructive transition hover:text-destructive/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive disabled:opacity-40"
+            >
+              Delete
+            </AlertDialogTrigger>
 
-              <AlertDialogDescription>
-                This will permanently remove this employee from the directory.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete {employee.name}?</AlertDialogTitle>
 
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogDescription>
+                  This will permanently remove this employee from the
+                  directory.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
 
-              <AlertDialogAction onClick={() => onDelete(employee.id)}>
-                Delete employee
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+
+                <AlertDialogAction onClick={() => onDelete(employee.id)}>
+                  Delete employee
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </div>
     </article>
   );

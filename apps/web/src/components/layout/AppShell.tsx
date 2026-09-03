@@ -1,56 +1,29 @@
 "use client";
 
-import type { ComponentType, ReactNode } from "react";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { SignOutButton } from "@clerk/nextjs";
+import { LogOut } from "lucide-react";
+
+import { cn, getInitials } from "@/lib/utils";
+import { useCurrentUser } from "@/lib/auth/useCurrentUser";
 import {
-  CalendarCheck,
-  CalendarDays,
-  CircleHelp,
-  Grid2X2,
-  LayoutGrid,
-  Plus,
-  UserCircle,
-  Users,
-} from "lucide-react";
-
-import { cn } from "@/lib/utils";
-
-const mainNavigation = [
-  { href: "/", label: "Dashboard", icon: LayoutGrid },
-  { href: "/rota", label: "Weekly Rota", icon: Grid2X2 },
-  { href: "/employees", label: "Staff Directory", icon: Users },
-  { href: "/shifts", label: "Shifts", icon: CalendarDays },
-  { href: "/availability", label: "Availability", icon: CalendarCheck },
-] as const;
-
-const topNavigation = [
-  { href: "/rota", label: "Schedule" },
-  { href: "/employees", label: "Employees" },
-  { href: "/availability", label: "Availability" },
-] as const;
+  getHomeHref,
+  getNavigation,
+  type NavItem,
+} from "@/lib/navigation/roleNavigation";
 
 function isActiveRoute(pathname: string, href: string) {
-  if (href === "/") {
-    return pathname === "/";
-  }
-
   return pathname.startsWith(href);
 }
-
-type NavigationLinkProps = {
-  href: string;
-  label: string;
-  icon: ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
-  pathname: string;
-};
 
 function NavigationLink({
   href,
   label,
   icon: Icon,
   pathname,
-}: NavigationLinkProps) {
+}: NavItem & { pathname: string }) {
   const active = isActiveRoute(pathname, href);
 
   return (
@@ -58,8 +31,8 @@ function NavigationLink({
       href={href}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "flex min-h-11 items-center gap-4 px-4 text-sm font-medium text-[#3f433c] transition hover:bg-[#d9ee9f]/70 hover:text-[#092514] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#092514] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f6f3ed]",
-        active && "bg-[#d9ee9f] text-[#52642b]",
+        "flex min-h-11 items-center gap-3 rounded-lg px-4 text-sm font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar",
+        active && "bg-accent text-accent-foreground",
       )}
     >
       <Icon className="size-5" aria-hidden />
@@ -68,76 +41,146 @@ function NavigationLink({
   );
 }
 
+function AccountFooter({
+  displayName,
+  roleLabel,
+}: {
+  displayName: string;
+  roleLabel: string;
+}) {
+  return (
+    <div className="mt-auto border-t border-sidebar-border p-5">
+      <div className="flex items-center gap-3">
+        <span
+          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-medium text-accent-foreground"
+          aria-hidden="true"
+        >
+          {getInitials(displayName)}
+        </span>
+
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold text-sidebar-foreground">
+            {displayName}
+          </p>
+          <p className="truncate text-xs text-muted-foreground">
+            {roleLabel}
+          </p>
+        </div>
+
+        <SignOutButton>
+          <button
+            type="button"
+            aria-label="Sign out"
+            className="flex size-9 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <LogOut className="size-4" aria-hidden />
+          </button>
+        </SignOutButton>
+      </div>
+    </div>
+  );
+}
+
+function CenteredMessage({
+  title,
+  description,
+  action,
+}: {
+  title: string;
+  description: string;
+  action?: ReactNode;
+}) {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="max-w-sm text-center">
+        <h1 className="text-xl font-semibold text-foreground">{title}</h1>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+          {description}
+        </p>
+        {action}
+      </div>
+    </div>
+  );
+}
+
 export default function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const isAuthRoute =
+    pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up");
+
+  const currentUser = useCurrentUser({ skip: isAuthRoute });
+
+  if (isAuthRoute) {
+    return <>{children}</>;
+  }
+
+  if (currentUser.status === "loading" || currentUser.status === "signed-out") {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <p className="text-sm text-muted-foreground">Loading ShiftFlow...</p>
+      </div>
+    );
+  }
+
+  if (currentUser.status === "not-provisioned") {
+    return (
+      <CenteredMessage
+        title="Access pending"
+        description="Your account isn't linked to a ShiftFlow employee record yet. Ask your manager to add you to the staff directory with this email address."
+        action={
+          <SignOutButton>
+            <button
+              type="button"
+              className="mt-6 inline-flex h-10 items-center justify-center rounded-lg border border-border bg-background px-5 text-sm font-semibold text-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              Sign out
+            </button>
+          </SignOutButton>
+        }
+      />
+    );
+  }
+
+  if (currentUser.status === "error") {
+    return (
+      <CenteredMessage
+        title="Something went wrong"
+        description={currentUser.message}
+      />
+    );
+  }
+
+  const { user } = currentUser;
+  const navigation = getNavigation(user.role);
+  const displayName = user.employee?.name ?? user.email;
+  const roleLabel = user.role === "MANAGER" ? "Manager" : "Employee";
 
   return (
-    <div className="min-h-screen bg-[#fbfaf7] text-[#051f12]">
-      <header className="sticky top-0 z-30 border-b border-[#c6cbc2] bg-[#fbfaf7]/95 backdrop-blur">
-        <div className="flex h-20 items-center justify-between gap-4 px-4 sm:px-6">
+    <div className="min-h-screen bg-background text-foreground">
+      <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur lg:hidden">
+        <div className="flex h-16 items-center justify-between gap-4 px-4">
           <Link
-            href="/"
-            className="text-2xl font-black tracking-[-0.04em] text-[#052311] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#092514]"
+            href={getHomeHref(user.role)}
+            className="text-lg font-bold tracking-tight text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             ShiftFlow
           </Link>
-
-          <nav
-            aria-label="Primary"
-            className="hidden items-stretch gap-6 lg:flex"
-          >
-            {topNavigation.map((item) => {
-              const active = isActiveRoute(pathname, item.href);
-
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  aria-current={active ? "page" : undefined}
-                  className={cn(
-                    "flex h-20 items-center border-b-4 border-transparent text-lg font-semibold text-[#52642b] transition hover:text-[#092514] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#092514]",
-                    active && "border-[#092514] text-[#092514]",
-                  )}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-
-          <div className="flex items-center gap-3">
-            <Link
-              href="/account"
-              className="inline-flex size-10 items-center justify-center rounded-full border border-[#c6cbc2] text-[#52642b] transition hover:border-[#092514] hover:text-[#092514] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#092514]"
-              aria-label="Account"
-            >
-              <UserCircle className="size-5" aria-hidden />
-            </Link>
-          </div>
         </div>
       </header>
 
-      <div className="grid lg:grid-cols-[300px_minmax(0,1fr)]">
-        <aside className="sticky top-20 hidden h-[calc(100vh-5rem)] border-r border-[#c6cbc2] bg-[#f6f3ed] lg:flex lg:flex-col">
-          <div className="px-7 py-8">
-            <p className="text-2xl font-extrabold tracking-[-0.03em]">
-              ShiftFlow Ops
-            </p>
-            <p className="mt-1 text-base text-[#3f433c]">New York Office</p>
-          </div>
-
-          <div className="px-5">
+      <div className="lg:grid lg:grid-cols-[260px_minmax(0,1fr)]">
+        <aside className="sticky top-0 hidden h-screen border-r border-sidebar-border bg-sidebar lg:flex lg:flex-col">
+          <div className="px-6 py-7">
             <Link
-              href="/shifts"
-              className="flex h-11 items-center justify-center gap-3 bg-[#052311] px-4 text-sm font-bold text-white transition hover:bg-[#173f27] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#092514] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f6f3ed]"
+              href={getHomeHref(user.role)}
+              className="text-xl font-bold tracking-tight text-sidebar-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <Plus className="size-5" aria-hidden />
-              New Shift
+              ShiftFlow
             </Link>
           </div>
 
-          <nav aria-label="Operations" className="mt-8 space-y-2 px-5">
-            {mainNavigation.map((item) => (
+          <nav aria-label="Primary" className="space-y-1 px-4">
+            {navigation.map((item) => (
               <NavigationLink
                 key={item.href}
                 href={item.href}
@@ -148,37 +191,20 @@ export default function AppShell({ children }: { children: ReactNode }) {
             ))}
           </nav>
 
-          <div className="mt-auto border-t border-[#c6cbc2] p-5">
-            <Link
-              href="/help"
-              className="flex min-h-11 items-center gap-4 px-4 text-sm text-[#3f433c] transition hover:text-[#092514] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#092514]"
-            >
-              <CircleHelp className="size-5" aria-hidden />
-              Help Center
-            </Link>
-            <Link
-              href="/account"
-              className="mt-2 flex min-h-11 items-center gap-4 px-4 text-sm text-[#3f433c] transition hover:text-[#092514] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#092514]"
-            >
-              <UserCircle className="size-5" aria-hidden />
-              Account
-            </Link>
-          </div>
+          <AccountFooter displayName={displayName} roleLabel={roleLabel} />
         </aside>
 
-        <div className="min-w-0 pb-24 lg:pb-0">{children}</div>
+        <div className="min-w-0 pb-20 lg:pb-0">{children}</div>
       </div>
 
       <nav
-        aria-label="Mobile primary"
-        className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-[#c6cbc2] bg-[#fbfaf7] lg:hidden"
+        aria-label="Primary"
+        className={cn(
+          "fixed inset-x-0 bottom-0 z-30 grid border-t border-border bg-background lg:hidden",
+          navigation.length === 2 ? "grid-cols-2" : "grid-cols-3",
+        )}
       >
-        {[
-          mainNavigation[0],
-          { href: "/rota", label: "Schedule", icon: CalendarDays },
-          mainNavigation[4],
-          { href: "/account", label: "Account", icon: UserCircle },
-        ].map((item) => {
+        {navigation.map((item) => {
           const active = isActiveRoute(pathname, item.href);
           const Icon = item.icon;
 
@@ -188,11 +214,11 @@ export default function AppShell({ children }: { children: ReactNode }) {
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "flex min-h-20 flex-col items-center justify-center gap-1 border-t-4 border-transparent text-xs font-medium text-[#52642b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#092514]",
-                active && "border-[#092514] text-[#092514]",
+                "flex min-h-16 flex-col items-center justify-center gap-1 border-t-2 border-transparent text-xs font-medium text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
+                active && "border-primary text-primary",
               )}
             >
-              <Icon className="size-6" aria-hidden />
+              <Icon className="size-5" aria-hidden />
               <span>{item.label}</span>
             </Link>
           );

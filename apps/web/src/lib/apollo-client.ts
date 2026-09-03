@@ -5,7 +5,7 @@ type GetToken = () => Promise<string | null>;
 
 export const createApolloClient = (getToken: GetToken) => {
   const httpLink = new HttpLink({
-    uri: process.env.NEXT_PUBLIC_GRAPHQL_URL,
+    uri: process.env.NEXT_PUBLIC_GRAPHQL_URL ?? "/graphql",
   });
 
   const authLink = setContext(async (_, { headers }) => {

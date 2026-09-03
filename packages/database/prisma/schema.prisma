@@ -65,3 +65,12 @@ model Shift {
   @@index([employeeId])
   @@index([startTime])
 }
+
+model WeekPublication {
+  id          String    @id @default(cuid())
+  weekStart   DateTime  @unique
+  publishedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

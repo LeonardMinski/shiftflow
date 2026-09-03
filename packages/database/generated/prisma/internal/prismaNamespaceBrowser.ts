@@ -51,9 +51,11 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
+  User: 'User',
   Employee: 'Employee',
   EmployeeAvailability: 'EmployeeAvailability',
-  Shift: 'Shift'
+  Shift: 'Shift',
+  WeekPublication: 'WeekPublication'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -70,6 +72,19 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 } as const)
 
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
+
+
+export const UserScalarFieldEnum = {
+  id: 'id',
+  authProviderId: 'authProviderId',
+  email: 'email',
+  role: 'role',
+  employeeId: 'employeeId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
 export const EmployeeScalarFieldEnum = {
@@ -108,6 +123,17 @@ export const ShiftScalarFieldEnum = {
 } as const
 
 export type ShiftScalarFieldEnum = (typeof ShiftScalarFieldEnum)[keyof typeof ShiftScalarFieldEnum]
+
+
+export const WeekPublicationScalarFieldEnum = {
+  id: 'id',
+  weekStart: 'weekStart',
+  publishedAt: 'publishedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type WeekPublicationScalarFieldEnum = (typeof WeekPublicationScalarFieldEnum)[keyof typeof WeekPublicationScalarFieldEnum]
 
 
 export const SortOrder = {

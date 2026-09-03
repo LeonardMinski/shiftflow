@@ -435,10 +435,6 @@ export type BoolFieldUpdateOperationsInput = {
   set?: boolean
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
 export type EmployeeAvailabilityCreateWithoutEmployeeInput = {
   id?: string
   dayOfWeek: string

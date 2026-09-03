@@ -8,7 +8,9 @@
  *
  * 🟢 You can import this file directly.
  */
+export type * from './models/User.ts'
 export type * from './models/Employee.ts'
 export type * from './models/EmployeeAvailability.ts'
 export type * from './models/Shift.ts'
+export type * from './models/WeekPublication.ts'
 export type * from './commonInputTypes.ts'

@@ -22,7 +22,7 @@ export function Field({
     <div>
       <Label
         htmlFor={id}
-        className="mb-2 block font-mono text-[11px] uppercase tracking-[0.16em] text-black/45"
+        className="mb-2 block font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground"
       >
         {label}
       </Label>
@@ -35,11 +35,11 @@ export function Field({
         required
         onChange={(event) => onChange(event.target.value)}
         className="
-          w-full border-0 border-b border-black/25
-          bg-transparent px-0 py-3 text-[15px] text-black
+          w-full border-0 border-b border-border
+          bg-transparent px-0 py-3 text-[15px] text-foreground
           outline-none transition
-          placeholder:text-black/25
-          focus:border-black
+          placeholder:text-muted-foreground/60
+          focus:border-primary
         "
       />
     </div>

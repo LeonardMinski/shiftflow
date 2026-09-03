@@ -1,9 +1,9 @@
 import { expect, test } from "@playwright/test";
 
-test("loads the ShiftFlow home page", async ({ page }) => {
+test("redirects a signed-out visitor from the root route to sign in", async ({
+  page,
+}) => {
   await page.goto("/");
 
-  await expect(
-    page.getByRole("heading", { name: "ShiftFlow" }),
-  ).toBeVisible();
+  await expect(page).toHaveURL(/\/sign-in/);
 });

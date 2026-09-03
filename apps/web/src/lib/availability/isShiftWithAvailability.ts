@@ -1,4 +1,4 @@
-import { Employee } from "@/types";
+import { Employee, EmployeeAvailability } from "@/types";
 
 const days = [
   "Sunday",
@@ -10,19 +10,24 @@ const days = [
   "Saturday",
 ];
 
+export function getAvailabilityForShift(
+  employee: Employee,
+  startTime: string,
+): EmployeeAvailability | undefined {
+  const shiftDayNumber = new Date(startTime).getDay();
+  const shiftDay = days[shiftDayNumber];
+
+  return employee.availability.find((record) => record.dayOfWeek === shiftDay);
+}
+
 export function isShiftWithinAvailability(
   employee: Employee,
   startTime: string,
   endTime: string,
 ) {
-  const shiftDayNumber = new Date(startTime).getDay();
-
-  const shiftDay = days[shiftDayNumber];
   const shiftStartTime = startTime.slice(11);
   const shiftEndTime = endTime.slice(11);
-  const matchingAvailability = employee.availability.find(
-    (record) => record.dayOfWeek === shiftDay,
-  );
+  const matchingAvailability = getAvailabilityForShift(employee, startTime);
 
   if (!matchingAvailability) {
     return true;

@@ -115,10 +115,10 @@ export default function DisplayEmployees() {
 
   if (loading) {
     return (
-      <main className="min-h-[calc(100vh-5rem)] bg-[#fbfaf7] px-5 py-8 text-[#051f12] sm:px-8 lg:px-10">
+      <main className="min-h-[calc(100vh-5rem)] bg-background px-5 py-8 text-foreground sm:px-8 lg:px-10">
         <div className="max-w-7xl">
           <h1 className="text-3xl font-bold tracking-[-0.03em]">Employees</h1>
-          <p className="text-base text-[#3f433c]">Loading team...</p>
+          <p className="text-base text-muted-foreground">Loading team...</p>
         </div>
       </main>
     );
@@ -126,14 +126,14 @@ export default function DisplayEmployees() {
 
   if (error) {
     return (
-      <main className="min-h-[calc(100vh-5rem)] bg-[#fbfaf7] px-5 py-8 text-[#051f12] sm:px-8 lg:px-10">
+      <main className="min-h-[calc(100vh-5rem)] bg-background px-5 py-8 text-foreground sm:px-8 lg:px-10">
         <div className="max-w-7xl">
           <h1 className="text-3xl font-bold tracking-[-0.03em]">Employees</h1>
-          <p className="mt-4 max-w-xl text-base text-red-700">
+          <p className="mt-4 max-w-xl text-base text-destructive">
             We couldn&apos;t load the employee directory.
           </p>
 
-          <p className="mt-2 font-mono text-sm text-red-700">
+          <p className="mt-2 font-mono text-sm text-destructive">
             {error.message}
           </p>
         </div>
@@ -144,23 +144,20 @@ export default function DisplayEmployees() {
   if (!data) return null;
 
   return (
-    <main className="min-h-[calc(100vh-5rem)] bg-[#fbfaf7] text-[#051f12]">
+    <main className="min-h-[calc(100vh-5rem)] bg-background text-foreground">
       <div className="max-w-7xl px-5 py-8 sm:px-8 lg:px-10">
-        <header className="mb-8 flex flex-col gap-5 border-b border-[#c6cbc2] pb-8 xl:flex-row xl:items-end xl:justify-between">
+        <header className="mb-8 flex flex-col gap-5 border-b border-border pb-8 xl:flex-row xl:items-end xl:justify-between">
           <div>
-            <h1 className="text-4xl font-extrabold tracking-[-0.04em]">
+            <h1 className="text-3xl font-extrabold tracking-[-0.04em]">
               Employees
             </h1>
-            <p className="mt-2 text-base text-[#3f433c]">
-              Manage staff directory and access controls.
-            </p>
           </div>
 
           <a
             href="#employee-form"
-            className="inline-flex h-11 items-center justify-center bg-[#052311] px-5 text-sm font-bold text-white transition hover:bg-[#173f27] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#092514] focus-visible:ring-offset-2 xl:self-center"
+            className="inline-flex h-11 items-center justify-center rounded-lg bg-primary px-5 text-sm font-bold text-primary-foreground transition hover:bg-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 xl:self-center"
           >
-            Add Employee
+            Add employee
           </a>
         </header>
 

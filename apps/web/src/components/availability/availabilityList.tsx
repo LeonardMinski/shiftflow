@@ -1,4 +1,4 @@
-import { Ban, CheckCircle2, Trash2 } from "lucide-react";
+import { CheckCircle2, Trash2 } from "lucide-react";
 import { useMutation } from "@apollo/client/react";
 
 import { DELETE_EMPLOYEE_AVAILABILITY } from "@/graphql/availability/mutations";
@@ -10,7 +10,7 @@ import {
 } from "@/types/availability";
 
 type AvailabilityListProps = {
-  employees: Employee[];
+  employee: Employee;
 };
 
 const daysOfWeek = [
@@ -23,7 +23,7 @@ const daysOfWeek = [
   "Sunday",
 ] as const;
 
-export default function AvailabilityList({ employees }: AvailabilityListProps) {
+export default function AvailabilityList({ employee }: AvailabilityListProps) {
   const [deleteEmployeeAvailability] = useMutation<
     DeleteEmployeeAvailabilityData,
     DeleteEmployeeAvailabilityVariables
@@ -42,100 +42,61 @@ export default function AvailabilityList({ employees }: AvailabilityListProps) {
   return (
     <section aria-labelledby="availability-list-heading">
       <h2 id="availability-list-heading" className="sr-only">
-        Employee availability
+        {employee.name}&apos;s weekly availability
       </h2>
 
-      {employees.length === 0 ? (
-        <div className="border border-[#c6cbc2] bg-white p-10 text-center">
-          <p className="text-lg font-semibold">No employees available.</p>
-          <p className="mt-2 text-sm text-[#3f433c]">
-            Add employees before recording weekly availability.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-6">
-          {employees.map((employee) => (
-            <article
-              key={employee.id}
-              className="border border-[#c6cbc2] bg-white p-5 sm:p-6"
+      <div className="overflow-hidden rounded-lg border border-border bg-card">
+        {daysOfWeek.map((day) => {
+          const availability = employee.availability.find(
+            (record) => record.dayOfWeek === day,
+          );
+          const available = availability?.available === true;
+
+          return (
+            <div
+              key={day}
+              className={`group flex items-center justify-between gap-4 border-l-4 border-b border-border px-5 py-4 last:border-b-0 ${
+                available
+                  ? "border-l-primary bg-accent/60"
+                  : "border-l-transparent"
+              }`}
             >
-              <div className="mb-5 flex flex-col gap-2 border-b border-[#c6cbc2] pb-4 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <h3 className="text-xl font-bold tracking-[-0.03em]">
-                    {employee.name}
-                  </h3>
-                  <p className="mt-1 text-sm text-[#3f433c]">
-                    {employee.email}
-                  </p>
-                </div>
+              <span className="text-sm font-medium text-foreground">
+                {day}
+              </span>
 
-                <p className="text-sm font-medium text-[#52642b]">
-                  {employee.availability.length}{" "}
-                  {employee.availability.length === 1 ? "entry" : "entries"}
-                </p>
+              <div className="flex items-center gap-3">
+                {available ? (
+                  <>
+                    <span className="font-mono text-sm text-foreground">
+                      {availability?.startTime} - {availability?.endTime}
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
+                      <CheckCircle2 className="size-3.5" aria-hidden />
+                      Available
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-sm text-muted-foreground">
+                    Unavailable
+                  </span>
+                )}
+
+                {availability && (
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(availability.id)}
+                    aria-label={`Delete ${employee.name}'s ${day} availability`}
+                    className="flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground opacity-0 transition hover:text-destructive focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive group-hover:opacity-100"
+                  >
+                    <Trash2 className="size-4" aria-hidden />
+                  </button>
+                )}
               </div>
-
-              <div className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-4">
-                {daysOfWeek.map((day) => {
-                  const availability = employee.availability.find(
-                    (item) => item.dayOfWeek === day,
-                  );
-                  const available = availability?.available === true;
-
-                  return (
-                    <div
-                      key={day}
-                      className={`min-h-36 border p-5 ${
-                        availability
-                          ? "border-[#c6cbc2] bg-[#fbfaf7]"
-                          : "border-dashed border-[#c6cbc2] bg-[#f6f3ed]"
-                      } ${availability && !available ? "opacity-75" : ""}`}
-                    >
-                      <div className="flex items-center justify-between gap-3 border-b border-[#c6cbc2] pb-3">
-                        <p className="font-mono text-sm text-[#3f433c]">
-                          {day}
-                        </p>
-                        {available ? (
-                          <span className="inline-flex items-center gap-1 text-sm font-medium">
-                            <CheckCircle2 className="size-4" aria-hidden />
-                            Available
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 text-sm text-[#3f433c]">
-                            <Ban className="size-4" aria-hidden />
-                            Unavailable
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="mt-7 flex items-center justify-between gap-3">
-                        <p className="font-mono text-xl font-semibold tracking-[0.04em]">
-                          {available
-                            ? `${availability?.startTime ?? ""} - ${
-                                availability?.endTime ?? ""
-                              }`
-                            : "No hours"}
-                        </p>
-
-                        {availability && (
-                          <button
-                            type="button"
-                            onClick={() => handleDelete(availability.id)}
-                            aria-label={`Delete ${employee.name}'s ${day} availability`}
-                            className="flex size-9 shrink-0 items-center justify-center text-[#3f433c] transition hover:text-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700"
-                          >
-                            <Trash2 className="size-5" aria-hidden />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </article>
-          ))}
-        </div>
-      )}
+            </div>
+          );
+        })}
+      </div>
     </section>
   );
 }

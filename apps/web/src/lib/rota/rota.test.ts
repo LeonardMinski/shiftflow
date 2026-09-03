@@ -6,6 +6,7 @@ import {
   getStartOfTheWeek,
   getWeekDays,
   isSameDay,
+  toWeekStartKey,
 } from "./rota";
 
 const makeShift = (overrides: Partial<Shift>): Shift => ({
@@ -236,6 +237,33 @@ describe("rota helpers", () => {
     it("handles year-boundary behavior", () => {
       expect(localDateKey(getStartOfTheWeek(new Date("2027-01-01T12:00"))))
         .toBe("2026-12-28");
+    });
+  });
+
+  describe("toWeekStartKey", () => {
+    it("reinterprets the local calendar date as UTC midnight, regardless of the runtime's timezone", () => {
+      // A naive `weekStart.toISOString()` would convert local midnight to
+      // UTC, shifting the calendar date by a day for any non-UTC-zero
+      // timezone - silently breaking week-boundary comparisons (e.g.
+      // publish state) for anyone not on UTC. This locks in the fix: the
+      // key must always be the *local* Y/M/D, not the UTC-shifted instant.
+      const localMonday = new Date(2026, 7, 24, 0, 0, 0, 0);
+
+      expect(toWeekStartKey(localMonday)).toBe("2026-08-24T00:00:00.000Z");
+    });
+
+    it("pads single-digit months and days", () => {
+      const localMonday = new Date(2026, 0, 5, 0, 0, 0, 0);
+
+      expect(toWeekStartKey(localMonday)).toBe("2026-01-05T00:00:00.000Z");
+    });
+
+    it("is stable even when the time-of-day is not midnight", () => {
+      const localMondayAfternoon = new Date(2026, 7, 24, 15, 30, 0, 0);
+
+      expect(toWeekStartKey(localMondayAfternoon)).toBe(
+        "2026-08-24T00:00:00.000Z",
+      );
     });
   });
 

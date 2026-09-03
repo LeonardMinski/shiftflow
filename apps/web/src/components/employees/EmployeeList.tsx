@@ -20,22 +20,15 @@ export function EmployeeList({
         Current employees
       </h2>
 
-      <div className="overflow-hidden border border-[#c6cbc2] bg-white">
-        <div className="grid grid-cols-[minmax(0,1fr)_130px_200px_150px] border-b border-[#c6cbc2] bg-[#f6f3ed] px-5 py-4 text-sm uppercase tracking-[0.08em] text-[#051f12] max-lg:hidden">
-          <span>Employee</span>
-          <span>Role</span>
-          <span>Availability Summary</span>
-          <span className="text-right">Actions</span>
-        </div>
-
+      <div className="overflow-hidden rounded-lg border border-border bg-card">
         {employees.length === 0 ? (
           <div className="px-5 py-16 text-center">
-            <h3 className="text-2xl font-semibold tracking-[-0.03em]">
+            <h3 className="text-lg font-semibold tracking-[-0.02em]">
               No employees yet.
             </h3>
 
-            <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-[#3f433c]">
-              Add your first employee using the directory form.
+            <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-muted-foreground">
+              Add your first employee using the form.
             </p>
           </div>
         ) : (
@@ -51,10 +44,6 @@ export function EmployeeList({
           ))
         )}
       </div>
-
-      <p className="mt-6 text-sm text-[#3f433c]">
-        Showing 1 to {employees.length} of {employees.length} employees
-      </p>
     </section>
   );
 }

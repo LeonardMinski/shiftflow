@@ -30,8 +30,8 @@ export function EmployeeForm({
 }: EmployeeFormProps) {
   return (
     <aside id="employee-form" className="scroll-mt-28 xl:sticky xl:top-28 xl:self-start">
-      <div className="border border-[#c6cbc2] bg-[#f6f3ed] p-6 md:p-7">
-        <SectionLabel className="text-[#52642b]">
+      <div className="rounded-lg border border-border bg-muted p-6 md:p-7">
+        <SectionLabel>
           {editingEmployee ? "Edit person" : "Add person"}
         </SectionLabel>
 
@@ -39,7 +39,7 @@ export function EmployeeForm({
           {editingEmployee ? "Edit employee" : "New employee"}
         </h2>
 
-        <p className="mt-2 max-w-sm text-sm leading-6 text-[#3f433c]">
+        <p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">
           {editingEmployee
             ? "Update this employee's details."
             : "Add a team member to the shared directory."}
@@ -68,15 +68,15 @@ export function EmployeeForm({
             disabled={creating || updating}
             className="
               mt-2 flex h-11 w-full items-center justify-between
-              bg-[#171717] px-5 py-3.5
-              text-sm font-medium text-white
+              bg-primary px-5 py-3.5
+              text-sm font-medium text-primary-foreground
               transition
-              hover:bg-[#173f27]
+              hover:bg-primary/80
               focus-visible:outline-none
               focus-visible:ring-2
-              focus-visible:ring-[#092514]
+              focus-visible:ring-ring
               focus-visible:ring-offset-2
-              focus-visible:ring-offset-[#f6f3ed]
+              focus-visible:ring-offset-muted
               disabled:cursor-not-allowed
               disabled:opacity-40
             "
@@ -98,7 +98,7 @@ export function EmployeeForm({
             <Button
               type="button"
               onClick={onCancelEdit}
-              className="w-full bg-transparent text-sm text-[#52642b] transition hover:text-[#092514]"
+              className="w-full bg-transparent text-sm text-muted-foreground transition hover:text-foreground"
             >
               Cancel edit
             </Button>

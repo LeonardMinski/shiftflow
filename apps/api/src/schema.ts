@@ -1,5 +1,14 @@
 import { z } from "zod";
+import { GraphQLError } from "graphql";
 import { prisma } from "@shiftflow/database";
+
+import {
+  requireManager,
+  requireManagerOrOwnEmployee,
+  requireUser,
+  type GraphQLContext,
+  type ShiftFlowUser,
+} from "./auth.js";
 
 const createEmployeeSchema = z.object({
   name: z
@@ -75,11 +84,25 @@ const inputEmployeeAvailabilitySchema = z
   );
 
 export const typeDefs = `#graphql
+  enum Role {
+    MANAGER
+    EMPLOYEE
+  }
+
+  type User {
+    id: ID!
+    email: String!
+    role: Role!
+    employeeId: ID
+    employee: Employee
+  }
+
   type Employee {
     id: ID!
     name: String!
     email: String!
     availability: [EmployeeAvailability!]!
+    shifts: [Shift!]!
   }
 
   type Shift {
@@ -100,11 +123,19 @@ export const typeDefs = `#graphql
     endTime: String
   }
 
+  type WeekPublication {
+    id: ID!
+    weekStart: String!
+    publishedAt: String
+  }
+
   type Query {
+    me: User
     employees: [Employee!]!
     employee(id: ID!): Employee
     shifts: [Shift!]!
     shift(id: ID!): Shift
+    weekPublication(weekStart: String!): WeekPublication
   }
 
   input CreateEmployeeInput {
@@ -153,6 +184,8 @@ export const typeDefs = `#graphql
     ): EmployeeAvailability!
 
     deleteEmployeeAvailability(id: ID!): EmployeeAvailability!
+
+    publishWeek(weekStart: String!): WeekPublication!
   }
 `;
 
@@ -217,6 +250,22 @@ type DeleteEmployeeAvailabilityArgs = {
   id: string;
 };
 
+type WeekPublicationArgs = {
+  weekStart: string;
+};
+
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+/** Monday 00:00 UTC of the week containing `date`, matching the frontend's Monday-start week convention. */
+const getWeekStartUtc = (date: Date): Date => {
+  const utcMidnight = new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
+  );
+  const daysSinceMonday = (utcMidnight.getUTCDay() + 6) % 7;
+
+  return new Date(utcMidnight.getTime() - daysSinceMonday * MS_PER_DAY);
+};
+
 export const resolvers = {
   Shift: {
     startTime: (parent: ShiftParent) => parent.startTime.toISOString(),
@@ -224,43 +273,107 @@ export const resolvers = {
   },
 
   Query: {
-    employees: async () =>
-      prisma.employee.findMany({
+    me: async (_parent: unknown, _args: unknown, context: GraphQLContext) => {
+      if (!context.clerkUserId) {
+        throw new GraphQLError("Not signed in", {
+          extensions: { code: "UNAUTHENTICATED" },
+        });
+      }
+
+      if (!context.user) {
+        throw new GraphQLError("Account not provisioned", {
+          extensions: { code: "ACCOUNT_NOT_PROVISIONED" },
+        });
+      }
+
+      return context.user;
+    },
+
+    employees: async (
+      _parent: unknown,
+      _args: unknown,
+      context: GraphQLContext,
+    ) => {
+      requireManager(context);
+
+      return prisma.employee.findMany({
         include: {
           availability: true,
         },
-      }),
+      });
+    },
 
-    employee: async (_parent: unknown, args: EmployeeArgs) =>
-      prisma.employee.findUnique({
+    employee: async (
+      _parent: unknown,
+      args: EmployeeArgs,
+      context: GraphQLContext,
+    ) => {
+      requireManager(context);
+
+      return prisma.employee.findUnique({
         where: {
           id: args.id,
         },
         include: {
           availability: true,
         },
-      }),
+      });
+    },
 
-    shifts: async () =>
-      prisma.shift.findMany({
+    shifts: async (
+      _parent: unknown,
+      _args: unknown,
+      context: GraphQLContext,
+    ) => {
+      requireManager(context);
+
+      return prisma.shift.findMany({
         include: {
           employee: true,
         },
-      }),
+      });
+    },
 
-    shift: async (_parent: unknown, args: ShiftArgs) =>
-      prisma.shift.findUnique({
+    shift: async (
+      _parent: unknown,
+      args: ShiftArgs,
+      context: GraphQLContext,
+    ) => {
+      requireManager(context);
+
+      return prisma.shift.findUnique({
         where: {
           id: args.id,
         },
         include: {
           employee: true,
         },
-      }),
+      });
+    },
+
+    weekPublication: async (
+      _parent: unknown,
+      args: WeekPublicationArgs,
+      context: GraphQLContext,
+    ) => {
+      requireUser(context);
+
+      return prisma.weekPublication.findUnique({
+        where: {
+          weekStart: new Date(args.weekStart),
+        },
+      });
+    },
   },
 
   Mutation: {
-    createEmployee: async (_parent: unknown, args: CreateEmployeeArgs) => {
+    createEmployee: async (
+      _parent: unknown,
+      args: CreateEmployeeArgs,
+      context: GraphQLContext,
+    ) => {
+      requireManager(context);
+
       const result = createEmployeeSchema.safeParse(args.input);
 
       if (!result.success) {
@@ -287,7 +400,13 @@ export const resolvers = {
       });
     },
 
-    updateEmployee: async (_parent: unknown, args: UpdateEmployeeArgs) => {
+    updateEmployee: async (
+      _parent: unknown,
+      args: UpdateEmployeeArgs,
+      context: GraphQLContext,
+    ) => {
+      requireManager(context);
+
       const result = updateEmployeeSchema.safeParse(args.input);
 
       if (!result.success) {
@@ -329,7 +448,13 @@ export const resolvers = {
       });
     },
 
-    deleteEmployee: async (_parent: unknown, args: EmployeeArgs) => {
+    deleteEmployee: async (
+      _parent: unknown,
+      args: EmployeeArgs,
+      context: GraphQLContext,
+    ) => {
+      requireManager(context);
+
       const existingEmployee = await prisma.employee.findUnique({
         where: {
           id: args.id,
@@ -347,7 +472,13 @@ export const resolvers = {
       });
     },
 
-    createShift: async (_parent: unknown, args: CreateShiftArgs) => {
+    createShift: async (
+      _parent: unknown,
+      args: CreateShiftArgs,
+      context: GraphQLContext,
+    ) => {
+      requireManager(context);
+
       const result = createShiftSchema.safeParse(args.input);
 
       if (!result.success) {
@@ -381,7 +512,13 @@ export const resolvers = {
       });
     },
 
-    updateShift: async (_parent: unknown, args: UpdateShiftArgs) => {
+    updateShift: async (
+      _parent: unknown,
+      args: UpdateShiftArgs,
+      context: GraphQLContext,
+    ) => {
+      requireManager(context);
+
       const result = updateShiftSchema.safeParse(args.input);
 
       if (!result.success) {
@@ -444,7 +581,13 @@ export const resolvers = {
       });
     },
 
-    deleteShift: async (_parent: unknown, args: ShiftArgs) => {
+    deleteShift: async (
+      _parent: unknown,
+      args: ShiftArgs,
+      context: GraphQLContext,
+    ) => {
+      requireManager(context);
+
       const existingShift = await prisma.shift.findUnique({
         where: {
           id: args.id,
@@ -465,7 +608,10 @@ export const resolvers = {
     setEmployeeAvailability: async (
       _parent: unknown,
       args: EmployeeAvailabilityArgs,
+      context: GraphQLContext,
     ) => {
+      requireManagerOrOwnEmployee(context, args.input.employeeId);
+
       const result = inputEmployeeAvailabilitySchema.safeParse(args.input);
 
       if (!result.success) {
@@ -509,7 +655,10 @@ export const resolvers = {
     deleteEmployeeAvailability: async (
       _parent: unknown,
       args: DeleteEmployeeAvailabilityArgs,
+      context: GraphQLContext,
     ) => {
+      requireManager(context);
+
       const existingEmployeeAvailability =
         await prisma.employeeAvailability.findUnique({
           where: {
@@ -526,6 +675,94 @@ export const resolvers = {
           id: args.id,
         },
       });
+    },
+
+    publishWeek: async (
+      _parent: unknown,
+      args: WeekPublicationArgs,
+      context: GraphQLContext,
+    ) => {
+      requireManager(context);
+
+      const weekStart = new Date(args.weekStart);
+
+      return prisma.weekPublication.upsert({
+        where: {
+          weekStart,
+        },
+        update: {
+          publishedAt: new Date(),
+        },
+        create: {
+          weekStart,
+          publishedAt: new Date(),
+        },
+      });
+    },
+  },
+
+  User: {
+    employee: async (parent: ShiftFlowUser) => {
+      if (!parent.employeeId) {
+        return null;
+      }
+
+      return prisma.employee.findUnique({
+        where: {
+          id: parent.employeeId,
+        },
+        include: {
+          availability: true,
+        },
+      });
+    },
+  },
+
+  Employee: {
+    shifts: async (
+      parent: { id: string },
+      _args: unknown,
+      context: GraphQLContext,
+    ) => {
+      const user = requireUser(context);
+
+      if (user.role !== "MANAGER" && user.employeeId !== parent.id) {
+        throw new GraphQLError("Forbidden", {
+          extensions: { code: "FORBIDDEN" },
+        });
+      }
+
+      const shifts = await prisma.shift.findMany({
+        where: {
+          employeeId: parent.id,
+        },
+        include: {
+          employee: true,
+        },
+      });
+
+      if (user.role === "MANAGER") {
+        return shifts;
+      }
+
+      // Employees may only see shifts that fall within a published week.
+      const publications = await prisma.weekPublication.findMany({
+        where: {
+          publishedAt: {
+            not: null,
+          },
+        },
+      });
+
+      const publishedWeekStarts = new Set(
+        publications.map((publication) =>
+          publication.weekStart.toISOString(),
+        ),
+      );
+
+      return shifts.filter((shift) =>
+        publishedWeekStarts.has(getWeekStartUtc(shift.startTime).toISOString()),
+      );
     },
   },
 };
